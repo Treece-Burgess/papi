@@ -119,7 +119,7 @@ static int cuda_init_component(int cidx)
     _cuda_vector.cmp_info.num_native_events = -1;
     _cuda_lock = PAPI_NUM_LOCK + NUM_INNER_LOCK + cidx;
 
-    _cuda_vector.cmp_info.initialized = 1;
+    //_cuda_vector.cmp_info.initialized = 0;
     _cuda_vector.cmp_info.disabled = PAPI_EDELAY_INIT;
     sprintf(_cuda_vector.cmp_info.disabled_reason,
         "Not initialized. Access component events to initialize it.");
@@ -161,24 +161,32 @@ static int cuda_init_private(void)
     }
 
     _cuda_vector.cmp_info.disabled = PAPI_OK;
-    strcpy(_cuda_vector.cmp_info.disabled_reason, "");
+    snprintf(_cuda_vector.cmp_info.disabled_reason, sizeof(_cuda_vector.cmp_info.disabled_reason) ,"%s", "");
 
 fn_exit:
+    _cuda_vector.cmp_info.initialized = 1;
     return papi_errno;
 }
 
 static int check_n_initialize(void)
 {
-    _papi_hwi_lock(COMPONENT_LOCK);
-    int papi_errno = PAPI_OK;
-    if (_cuda_vector.cmp_info.initialized
-        && _cuda_vector.cmp_info.disabled == PAPI_EDELAY_INIT
-    ) {
-        papi_errno = cuda_init_private();
+
+
+    //_papi_hwi_lock(COMPONENT_LOCK);
+    //int papi_errno = PAPI_OK;
+    //if (_cuda_vector.cmp_info.initialized
+    //    && _cuda_vector.cmp_info.disabled == PAPI_EDELAY_INIT
+    //) {
+    //    papi_errno = cuda_init_private();
+    //}
+
+    //_papi_hwi_unlock(COMPONENT_LOCK);
+    //return papi_errno;
+    if (!_cuda_vector.cmp_info.initialized) {
+        return cuda_init_private();
     }
 
-    _papi_hwi_unlock(COMPONENT_LOCK);
-    return papi_errno;
+    return _cuda_vector.cmp_info.disabled;
 }
 
 static int cuda_ntv_enum_events(unsigned int *event_code, int modifier)

@@ -217,6 +217,9 @@ rocm_init_private(void)
         goto fn_fail;
     }
 
+    /* update disabled_reason after successful rocm initialization */
+    snprintf(_rocm_vector.cmp_info.disabled_reason, sizeof(_rocm_vector.cmp_info.disabled_reason), "%s", "");
+
     int count = 0;
     papi_errno = evt_get_count(&count);
     _rocm_vector.cmp_info.num_native_events = count;

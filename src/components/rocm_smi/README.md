@@ -24,23 +24,23 @@ For ROCM_SMI, PAPI requires one environment variable: `PAPI_ROCMSMI_ROOT`. Note
 in most installations, this is a subdirectory under the ROCM directory. This is 
 required at both compile and run time.
 
-If ROCm > 6.0, the following should be sufficient in building the `rocm_smi` component: 
+ - If ROCm $\geq$ 6.0, the following should be sufficient in building the `rocm_smi` component: 
 
-    export PAPI_ROCMSI_ROOT=/opt/rocm/
+       export PAPI_ROCMSMI_ROOT=/opt/rocm/
 
-Within PAPI_ROCMSMI_ROOT, we expect the following standard directories:
+   Within PAPI_ROCMSMI_ROOT, we expect the following standard directories:
 
-    PAPI_ROCMSMI_ROOT/lib
-    PAPI_ROCMSMI_ROOT/include/
+       PAPI_ROCMSMI_ROOT/lib
+       PAPI_ROCMSMI_ROOT/include/
 
-If ROCm < 6.0, the following should be sufficient in building the `rocm_smi` component:
+ - If ROCm $\lt$ 6.0, the following should be sufficient in building the `rocm_smi` component:
 
-    export PAPI_ROCMSMI_ROOT=/opt/rocm/rocm_smi
+       export PAPI_ROCMSMI_ROOT=/opt/rocm/rocm_smi
 
-Within PAPI_ROCMSMI_ROOT, we expect the following standard directories:
+   Within PAPI_ROCMSMI_ROOT, we expect the following standard directories:
 
-    PAPI_ROCMSMI_ROOT/lib
-    PAPI_ROCMSMI_ROOT/include/rocm_smi
+       PAPI_ROCMSMI_ROOT/lib
+       PAPI_ROCMSMI_ROOT/include/rocm_smi
 
 ## Known Limitations
 

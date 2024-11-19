@@ -37,10 +37,10 @@
 #endif 
 
 // Event Name filters, used in init_component for the routine pmTraversePMNS(). Differs by system.
-//#define AGENT_NAME "xfs"          /* Saturn PCP. */
-//#define AGENT_NAME "mem"          /* Saturn PCP. */
-  #define AGENT_NAME "perfevent"    /* Power9 PCP. */
-//#define AGENT_NAME ""             /* Get it all! */
+//#define AGENT_NAME "xfs"
+//#define AGENT_NAME "mem"
+//#define AGENT_NAME "perfevent"
+#define AGENT_NAME ""             /* Obtain events for all available agents on a users' machine */
 
 /* To remove redefined warnings */
 #undef PACKAGE_BUGREPORT

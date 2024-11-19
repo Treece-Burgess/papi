@@ -304,6 +304,7 @@ rocp_evt_name_to_code(const char *name, uint64_t *event_code)
         goto fn_exit;
     }
 
+
     int flags = (event->instances > 1) ? (DEVICE_FLAG | INSTAN_FLAG) : DEVICE_FLAG;
     int nameid = (int) (event - ntv_table_p->events);
     event_info_t info = { device, instance, flags, nameid };
@@ -812,7 +813,15 @@ evt_name_to_device(const char *name, int *device)
     if (!p) {
         return PAPI_ENOEVNT;
     }
-    *device = (int) strtol(p + strlen(":device="), NULL, 10);
+
+    char *endPtr;
+    *device = (int) strtol(p + strlen(":device="), &endPtr, 10);
+    /* check to make sure only qualifiers have been appened */
+    if (*endPtr != '\0') {
+        if (strncmp(endPtr, ":instance=", 10) != 0) {
+            return PAPI_ENOEVNT;
+        }
+    }
     return PAPI_OK;
 }
 
@@ -837,7 +846,14 @@ evt_name_to_instance(const char *name, int *instance)
         if (!p) {
             return PAPI_ENOEVNT;
         }
-        *instance = (int) strtol(p + strlen(":instance="), NULL, 10);
+        char *endPtr;
+        *instance = (int) strtol(p + strlen(":instance="), &endPtr, 10);
+        /* check to make sure only qualifiers have been appened */
+        if (*endPtr != '\0') {
+            if (strncmp(endPtr, ":device=", 8) != 0) {
+                return PAPI_ENOEVNT;
+            }
+        }
     } else {
         if (p) {
             return PAPI_ENOEVNT;

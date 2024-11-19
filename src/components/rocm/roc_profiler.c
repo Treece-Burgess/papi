@@ -304,7 +304,6 @@ rocp_evt_name_to_code(const char *name, uint64_t *event_code)
         goto fn_exit;
     }
 
-
     int flags = (event->instances > 1) ? (DEVICE_FLAG | INSTAN_FLAG) : DEVICE_FLAG;
     int nameid = (int) (event - ntv_table_p->events);
     event_info_t info = { device, instance, flags, nameid };
@@ -846,6 +845,7 @@ evt_name_to_instance(const char *name, int *instance)
         if (!p) {
             return PAPI_ENOEVNT;
         }
+
         char *endPtr;
         *instance = (int) strtol(p + strlen(":instance="), &endPtr, 10);
         /* check to make sure only qualifiers have been appened */

@@ -24,17 +24,19 @@ LDFLAGS = -ldl -g -L$(PAPI_ROCM_ROOT)/lib/rocblas -lrocblas
 	@echo "CFLAGS=" $(CFLAGS)
 	g++ $(CFLAGS) $(OPTFLAGS) $(INCLUDE) -c -o $@ $<
 
-TESTS = 
+TESTS = rocm_smi_command_line rocm_smi_all \
+        power_monitor_with_rocm_smi rocm_smi_example \
+        rocm_smi_writeTests 
 
 rocm_smi_tests: $(TESTS)
 
 # Note: We compile .o separately from the executable link; some versions of hipcc
 #       have trouble managing libraries if we try to do both in a single step.
 
-rocm_command_line.o: rocm_command_line.cpp $(UTILOBJS) $(PAPILIB)
+rocm_smi_command_line.o: rocm_smi_command_line.cpp $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -c $< -o $@ 
 
-rocm_command_line: rocm_command_line.o $(UTILOBJS) $(PAPILIB)
+rocm_smi_command_line: rocm_smi_command_line.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS) 
 
 rocm_smi_all.o: rocm_smi_all.cpp $(UTILOBJS) $(PAPILIB)
@@ -43,16 +45,16 @@ rocm_smi_all.o: rocm_smi_all.cpp $(UTILOBJS) $(PAPILIB)
 rocm_smi_all: rocm_smi_all.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS) 
 
-power_monitor_rocm.o: power_monitor_rocm.cpp $(UTILOBJS) $(PAPILIB)
+power_monitor_with_rocm_smi.o: power_monitor_with_rocm_smi.cpp $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-power_monitor_rocm: power_monitor_rocm.o $(UTILOBJS) $(PAPILIB)
+power_monitor_with_rocm_smi: power_monitor_with_rocm_smi.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS) 
 
-rocmsmi_example.o: rocmsmi_example.cpp $(UTILOBJS) $(PAPILIB)
+rocm_smi_example.o: rocm_smi_example.cpp $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-rocmsmi_example: rocmsmi_example.o $(UTILOBJS) $(PAPILIB)
+rocm_smi_example: rocm_smi_example.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS) -lpthread
 
 rocm_smi_writeTests.o: rocm_smi_writeTests.cpp $(UTILOBJS) $(PAPILIB)
@@ -61,15 +63,8 @@ rocm_smi_writeTests.o: rocm_smi_writeTests.cpp $(UTILOBJS) $(PAPILIB)
 rocm_smi_writeTests: rocm_smi_writeTests.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS)
 
-square.o: square.cpp $(UTILOBJS) $(PAPILIB)
-	$(HIPCC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-square: square.o $(UTILOBJS) $(PAPILIB)
-	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS)
-
 clean:
-	rm -f $(TESTS) *.o
-	rm -f rocm_command_line rocmsmi_example power_monitor_rocm rocm_smi_writeTests square
+	rm -f *.o $(TESTS)
 
 checkpath: 
 	echo PAPI_ROCM_ROOT = $(PAPI_ROCM_ROOT)

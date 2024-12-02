@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "papi.h"
-#include <hip/hip_runtime.h>
 #include <unistd.h>
+
+#include "papi.h"
+#include "papi_test.h"
+
+#include <hip/hip_runtime.h>
 
 #define CHECK(cmd) \
 {\
@@ -155,6 +158,7 @@ void conductTest(int EventSet, int device, long long *values) {
     int ret, thisDev, verbose=0;
 
 	ret = PAPI_start( EventSet );
+        printf("%d\n", ret);
 	if (ret != PAPI_OK ) {
 	    fprintf(stderr,"Error! PAPI_start\n");
 	    exit( ret );
@@ -208,7 +212,7 @@ void conductTest(int EventSet, int device, long long *values) {
     if (verbose) fprintf(stderr, "Passed. info: About to read event with PAPI_stop.\n");
     ret = PAPI_stop( EventSet, values );
     if (ret != PAPI_OK ) {
-        fprintf(stderr,"Error! PAPI_stop failed.\n");
+        fprintf(stderr,"Error! PAPI_stop failed: %d\n", ret);
         if (verbose) fprintf(stderr, "PAPI_stop failed.\n");
         exit(ret);
     }
@@ -568,5 +572,9 @@ int main(int argc, char *argv[])
     } // end loop on type.
 
     PAPI_shutdown();                                                                    // Returns no value.
+
+    /* If we hit here everything ran as expected */
+    test_pass( __FILE__ ); 
+
     return(0);                                                                          // exit OK.
 } // end MAIN.

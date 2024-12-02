@@ -8,20 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "papi.h"
+#include "papi_test.h"
+#include "do_loops.h"
 #include <hip/hip_runtime.h>
 #include <unistd.h>
 #include "rocm_smi.h"   // Need some enumerations.
 
 #include "force_init.h"
-
-#define CHECK(cmd) \
-{\
-    hipError_t error  = cmd;\
-    if (error != hipSuccess) { \
-        fprintf(stderr, "error: '%s'(%d) at %s:%d\n", hipGetErrorString(error), error,__FILE__, __LINE__); \
-        exit(EXIT_FAILURE);\
-	  }\
-}
 
 // THIS MACRO EXITS if the papi call does not return PAPI_OK. Do not use for routines that
 // return anything else; e.g. PAPI_num_components, PAPI_get_component_info, PAPI_library_init.
@@ -35,70 +28,13 @@
         }                                                                                 \
     } while (0);
 
-
-#define MEMORY_ALLOCATION_CALL(var)                                     \
-    do {                                                                \
-        if (var == NULL) {                                              \
-            fprintf(stderr, "%s:%d: Error: Memory Allocation Failed \n",\
-                    __FILE__, __LINE__);                                \
-            exit(-1);                                                   \
-        }                                                               \
-    } while (0);  
-
-
-#define MAX_DEVICES    (32)
-#define BLOCK_SIZE     (1024)
-#define GRID_SIZE      (512)
-#define BUF_SIZE       (32 * 1024)
-#define ALIGN_SIZE     (8)
-#define SUCCESS        (0)
-#define NUM_METRIC     (18)
-#define NUM_EVENTS     (2)
-#define MAX_SIZE       (64*1024*1024)   // 64 MB
-
-typedef union
-{
-    long long ll;
-    unsigned long long ull;
-    double    d;
-    void *vp;
-    unsigned char ch[8];
-} convert_64_t;
-
-typedef struct {
-    char name[128];
-    long long value;
-} eventStore_t;
-
-int eventsFoundCount = 0;               // occupants of the array.
-int eventsFoundMax;                     // Size of the array.
-int eventsFoundAdd = 32;                // Blocksize for increasing the array.
-int deviceCount=0;                      // Total devices seen.
-int deviceEvents[32] = {0};             // Number of events for each device=??.
-eventStore_t *eventsFound = NULL;       // The array.
-
-//-----------------------------------------------------------------------------
-// HIP routine: Square each element in the array A and write to array C.
-//-----------------------------------------------------------------------------
-template <typename T>
-__global__ void
-vector_square(T *C_d, T *A_d, size_t N)
-{
-    size_t offset = (blockIdx.x * blockDim.x + threadIdx.x);
-    size_t stride = blockDim.x * gridDim.x ;
-
-    for (size_t i=offset; i<N; i+=stride) {
-        C_d[i] = A_d[i] * A_d[i];
-    }
-}
-
 // Show help.
 //-----------------------------------------------------------------------------
 static void printUsage()
 {
-    printf("Demonstrate use of ROCM API write routines.\n");
-    printf("This program has no options, it will use PAPI to read/write/read\n");
-    printf("rocm_smi writable settings and report the results.              \n");
+    printf("This program takes two rocm_smi native events from the command line,\n");
+    printf("this event will be used with the PAPI interface to write.\n");
+    printf("The results for this event will be output to the terminal.\n");
 } // end routine.
 
 
@@ -118,99 +54,33 @@ void parseCommandLineArgs(int argc, char *argv[])
 } // end routine.
 
 //-----------------------------------------------------------------------------
-// conduct a test using HIP. Derived from AMD sample code 'square.cpp'.
-// coming in, EventSet is already populated, we just run the test and read.
-// Note values must point at an array large enough to store the events in
-// Eventset.
-//-----------------------------------------------------------------------------
-void conductTest(int EventSet, int device, long long *values) {
-    float *A_d, *C_d;
-    float *A_h, *C_h;
-    size_t N = 1000000;
-    size_t Nbytes = N * sizeof(float);
-    int ret, thisDev, verbose=0;
-
-	ret = PAPI_start( EventSet );
-	if (ret != PAPI_OK ) {
-	    fprintf(stderr,"Error! PAPI_start\n");
-	    exit( ret );
-	}
-
-    hipDeviceProp_t props;                        
-    if (verbose) fprintf(stderr, "args: EventSet=%i, device=%i, values=%p.\n", EventSet, device, values);
- 
-    CHECK(hipSetDevice(device));                      // Set device requested.
-    CHECK(hipGetDevice(&thisDev));                    // Double check.
-    CHECK(hipGetDeviceProperties(&props, thisDev));   // Get properties (for name).
-    if (verbose) fprintf (stderr, "info: Requested Device=%i, running on device %i=%s\n", device, thisDev, props.name);
-
-    if (verbose) fprintf (stderr, "info: allocate host mem (%6.2f MB)\n", 2*Nbytes/1024.0/1024.0);
-    A_h = (float*)malloc(Nbytes);                     // standard malloc for host.
-    CHECK(A_h == NULL ? hipErrorMemoryAllocation : hipSuccess );
-    C_h = (float*)malloc(Nbytes);                     // standard malloc for host.
-    CHECK(C_h == NULL ? hipErrorMemoryAllocation : hipSuccess );
-
-    // Fill with Phi + i
-    for (size_t i=0; i<N; i++) 
-    {
-        A_h[i] = 1.618f + i; 
-    }
-
-    if (verbose) fprintf (stderr, "info: allocate device mem (%6.2f MB)\n", 2*Nbytes/1024.0/1024.0);
-    CHECK(hipMalloc(&A_d, Nbytes));                   // HIP malloc for device.
-    CHECK(hipMalloc(&C_d, Nbytes));                   // ...
-
-
-    if (verbose) fprintf (stderr, "info: copy Host2Device\n");
-    CHECK ( hipMemcpy(A_d, A_h, Nbytes, hipMemcpyHostToDevice));  // Copy (*dest, *source, Type).
-
-    const unsigned blocks = 512;
-    const unsigned threadsPerBlock = 256;
-    (void) blocks;
-    (void) threadsPerBlock; 
-
-    if (verbose) fprintf (stderr, "info: launch 'vector_square' kernel\n");
-//  hipLaunchKernelGGL((vector_square), dim3(blocks), dim3(threadsPerBlock), 0, 0, C_d, A_d, N);
-
-    if (verbose) fprintf (stderr, "info: copy Device2Host\n");
-    CHECK ( hipMemcpy(C_h, C_d, Nbytes, hipMemcpyDeviceToHost));  // copy (*dest, *source, Type).
-
-//  if (verbose) fprintf (stderr, "info: check result\n");
-//  for (size_t i=0; i<N; i++)  {
-//      if (C_h[i] != A_h[i] * A_h[i]) {              // If value received is not square of value sent,
-//          CHECK(hipErrorUnknown);                   // ... We have a problem!
-//      }
-//  }
-
-    // We passed. Now we need to read the event.
-    if (verbose) fprintf(stderr, "Passed. info: About to read event with PAPI_stop.\n");
-    ret = PAPI_stop( EventSet, values );
-    if (ret != PAPI_OK ) {
-        fprintf(stderr,"Error! PAPI_stop failed.\n");
-        if (verbose) fprintf(stderr, "PAPI_stop failed.\n");
-        exit(ret);
-    }
-    
-    if (verbose) fprintf (stderr, "PAPI_stop succeeded.\n");
-
-} // end conductTest.
-
-//-----------------------------------------------------------------------------
 // Main program.
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
     int devices, device, i = 0;
-    char str[64];
+    //char str[64], EventName[PAPI_2MAX_STR_LEN];
     (void) device;
-    (void) str;
+    //(void) str;
 
-    // Parse command line arguments
+    /* a maximum of 5 rocm_smi events can be added */
+    int eventCount = argc - 1;
+    if (eventCount == 0) {
+        fprintf(stderr, "No eventnames specified at the command line. A maximum of five events can be added on the command line.\n");
+        fprintf(stderr, "Run './papi_native_avail' in your install directory to see available events.\n");
+        fprintf(stderr, "Example: './rocm_smi_writeTests rocm_smi:::temp_emergency:device=0:sensor=0'.\n");
+        test_skip(__FILE__, __LINE__, "", 0);
+    }
+    else if (eventCount > 5) {
+        fprintf(stderr, "A maximum of five events can be added on the command line.\n");
+        test_skip(__FILE__, __LINE__, "", 0); 
+    }
+
+    /* only options are for help */
     parseCommandLineArgs(argc, argv);
 
     // fprintf(stderr, "Setup PAPI counters internally (PAPI)\n");
     int EventSet = PAPI_NULL;
-    int eventCount;
     int ret;
     int k, m, cid=-1;
     (void) m;
@@ -253,18 +123,18 @@ int main(int argc, char *argv[])
     printf("Found ROCM_SMI Component at id %d\n", cid);
 
     // Add events at a GPU specific level ... eg rocm:::device=0:Whatever
-    eventCount = 0;
     int eventsRead=0;
     (void) eventsRead;
 
    // Begin enumeration of all events.
-
-    long long value=0;                                              // The only value we read.
+    //long long *values = (long long *) calloc(eventCount, sizeof (long long));
+    long long value = 0;
     std::string eventName;
     eventName = "rocm_smi:::NUMDevices";
 
     force_rocm_smi_init(cid);
 
+    /* collect the total number of devices on the machine */
     CALL_PAPI_OK(PAPI_create_eventset(&EventSet)); 
     CALL_PAPI_OK(PAPI_assign_eventset_component(EventSet, cid)); 
     ret = PAPI_add_named_event(EventSet, eventName.c_str());  
@@ -274,66 +144,98 @@ int main(int argc, char *argv[])
         devices = value;
         printf("Found %i devices.\n", devices);
     } else {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
         CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
         CALL_PAPI_OK(PAPI_destroy_eventset(&EventSet));         // destroy the event set.
-        exit(-1);
+        fprintf(stderr, "Failed to add_event: %s, with error message: %s\n", eventName.c_str(), PAPI_strerror(ret));
+        test_skip(__FILE__, __LINE__,"", 0);
     }
 
-    // Do something.
-    CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));              // Delete all events in set.
+    /* cleanup the eventset to add the command line event */
+    CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));
 
-    eventName = "rocm_smi:::device=0:sensor=0:fan_speed";
-    ret = PAPI_add_named_event(EventSet, eventName.c_str());
-    if (ret != PAPI_OK) {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
-        CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
-        exit(-1);
+    /* add the command line events */
+    for (i = 0; i < eventCount; i++) {
+        eventName = argv[i + 1];
+        printf("Event Names are: %s\n", eventName.c_str());
+        ret = PAPI_add_named_event(EventSet, eventName.c_str());
+        if (ret != PAPI_OK) {
+            fprintf(stderr, "Failed to add event: %s, with error message: %s\n", eventName.c_str(), PAPI_strerror(ret));
+            test_skip(__FILE__, __LINE__, "", 0);
+        }
     }
 
-    eventName = "rocm_smi:::device=0:sensor=0:fan_speed_max";
-    ret = PAPI_add_named_event(EventSet, eventName.c_str());
-    if (ret != PAPI_OK) {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
-        CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
-        exit(-1);
-    }
-
-    long long curmax[2];
+    long long curmax[1];
+    /* start counting */
     CALL_PAPI_OK(PAPI_start(EventSet));
     CALL_PAPI_OK(PAPI_stop(EventSet, curmax));
-    printf("Fan speed: current=%lli maximum=%lli.\n", curmax[0], curmax[1]);
-    CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));              // Delete all events in set.
+    printf("curmax: %lli\n", curmax[0] );
 
-    curmax[0]=128;
-    eventName = "rocm_smi:::device=0:sensor=0:fan_speed";
-    ret = PAPI_add_named_event(EventSet, eventName.c_str());
+    curmax[0] = 50000;
+    CALL_PAPI_OK(PAPI_start(EventSet));
+    /* set counter*/
+    ret = PAPI_write(EventSet, curmax);
     if (ret != PAPI_OK) {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
-        CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
-        exit(-1);
+        printf("Failed: %d\n", ret);
+        exit(1);
     }
 
+    /* read and output initial counter values */
+    //printf("PAPI_read:\n");
+    //CALL_PAPI_OK(PAPI_read(EventSet, values));
+    //for (i = 0; i < eventCount; i++) {
+    //    printf("%s counter values for PAPI_read: %lld\n", argv[i + 1], values[i]);
+    //}
+    //printf("\n");
+
+    /* must call PAPI_stop or there will be a runtime error with PAPI_write */
+    /* stop and output counter */
+    //printf("PAPI_stop:\n");
+    //CALL_PAPI_OK(PAPI_stop(EventSet, values));
+    //for (i = 0; i < eventCount; i++) {
+    //    printf("%s counter values for PAPI_stop: %lld\n", argv[i + 1], values[i]);
+    //}
+    //printf("\n"); 
+  
+    /* set values array for PAPI_write */
+    //for (i = 0; i < eventCount; i++) {
+    //    values[i] = 100;
+    //} 
+
+    /* write counter values and print to the terminal */
+    //CALL_PAPI_OK(PAPI_write(EventSet, values));
+
+    CALL_PAPI_OK(PAPI_stop(EventSet, &value));
+    /* output reads after PAPI_write */
+    for (i = 0; i < eventCount; i++) {
+        printf("%s counter values after PAPI_write: %lld\n", argv[i + 1], value);
+    } 
+
+    /* do reads */
+    //do_reads(10);
+
+    /*
     CALL_PAPI_OK(PAPI_start(EventSet));
-    ret = PAPI_write(EventSet, curmax);
+    ret = PAPI_write(EventSet, values);
     if ( ret != PAPI_OK ) {
-        PAPI_stop(EventSet, curmax);                                // Must be stopped.
+        PAPI_stop(EventSet, values);                                // Must be stopped.
         PAPI_cleanup_eventset(EventSet);                            // Empty it.
         PAPI_destroy_eventset(&EventSet);                           // Release memory.
         fprintf(stderr, "PAPI_write failure returned %i, = %s.\n", ret, PAPI_strerror(ret));
     } else {
-        printf("Call succeeded to set fan_speed to %llu RPM.\n", curmax[0]);
+        printf("Call succeeded to set fan_speed to %d RPM.\n", 0);
     }
-
+    */
     // Now try to read it. 
-    CALL_PAPI_OK(PAPI_stop(EventSet, &value));
-    printf("After set, read-back of fan value is %lli.\n", value);
+    //CALL_PAPI_OK(PAPI_stop(EventSet, values));
+    //printf("After set, read-back of fan value is %lli.\n", values);
 
     CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));              // Delete all events in set.
     CALL_PAPI_OK(PAPI_destroy_eventset(&EventSet));             // destroy the event set.
 
-    printf("Finished All Events.\n");
-
     PAPI_shutdown();                                            // Returns no value.
+
+    /* If we hit here everything ran as expected */
+    test_pass( __FILE__ );
+
     return(0);                                                  // exit OK.
 } // end MAIN.

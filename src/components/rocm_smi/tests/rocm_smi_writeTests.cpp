@@ -118,84 +118,6 @@ void parseCommandLineArgs(int argc, char *argv[])
 } // end routine.
 
 //-----------------------------------------------------------------------------
-// conduct a test using HIP. Derived from AMD sample code 'square.cpp'.
-// coming in, EventSet is already populated, we just run the test and read.
-// Note values must point at an array large enough to store the events in
-// Eventset.
-//-----------------------------------------------------------------------------
-void conductTest(int EventSet, int device, long long *values) {
-    float *A_d, *C_d;
-    float *A_h, *C_h;
-    size_t N = 1000000;
-    size_t Nbytes = N * sizeof(float);
-    int ret, thisDev, verbose=0;
-
-	ret = PAPI_start( EventSet );
-	if (ret != PAPI_OK ) {
-	    fprintf(stderr,"Error! PAPI_start\n");
-	    exit( ret );
-	}
-
-    hipDeviceProp_t props;                        
-    if (verbose) fprintf(stderr, "args: EventSet=%i, device=%i, values=%p.\n", EventSet, device, values);
- 
-    CHECK(hipSetDevice(device));                      // Set device requested.
-    CHECK(hipGetDevice(&thisDev));                    // Double check.
-    CHECK(hipGetDeviceProperties(&props, thisDev));   // Get properties (for name).
-    if (verbose) fprintf (stderr, "info: Requested Device=%i, running on device %i=%s\n", device, thisDev, props.name);
-
-    if (verbose) fprintf (stderr, "info: allocate host mem (%6.2f MB)\n", 2*Nbytes/1024.0/1024.0);
-    A_h = (float*)malloc(Nbytes);                     // standard malloc for host.
-    CHECK(A_h == NULL ? hipErrorMemoryAllocation : hipSuccess );
-    C_h = (float*)malloc(Nbytes);                     // standard malloc for host.
-    CHECK(C_h == NULL ? hipErrorMemoryAllocation : hipSuccess );
-
-    // Fill with Phi + i
-    for (size_t i=0; i<N; i++) 
-    {
-        A_h[i] = 1.618f + i; 
-    }
-
-    if (verbose) fprintf (stderr, "info: allocate device mem (%6.2f MB)\n", 2*Nbytes/1024.0/1024.0);
-    CHECK(hipMalloc(&A_d, Nbytes));                   // HIP malloc for device.
-    CHECK(hipMalloc(&C_d, Nbytes));                   // ...
-
-
-    if (verbose) fprintf (stderr, "info: copy Host2Device\n");
-    CHECK ( hipMemcpy(A_d, A_h, Nbytes, hipMemcpyHostToDevice));  // Copy (*dest, *source, Type).
-
-    const unsigned blocks = 512;
-    const unsigned threadsPerBlock = 256;
-    (void) blocks;
-    (void) threadsPerBlock; 
-
-    if (verbose) fprintf (stderr, "info: launch 'vector_square' kernel\n");
-//  hipLaunchKernelGGL((vector_square), dim3(blocks), dim3(threadsPerBlock), 0, 0, C_d, A_d, N);
-
-    if (verbose) fprintf (stderr, "info: copy Device2Host\n");
-    CHECK ( hipMemcpy(C_h, C_d, Nbytes, hipMemcpyDeviceToHost));  // copy (*dest, *source, Type).
-
-//  if (verbose) fprintf (stderr, "info: check result\n");
-//  for (size_t i=0; i<N; i++)  {
-//      if (C_h[i] != A_h[i] * A_h[i]) {              // If value received is not square of value sent,
-//          CHECK(hipErrorUnknown);                   // ... We have a problem!
-//      }
-//  }
-
-    // We passed. Now we need to read the event.
-    if (verbose) fprintf(stderr, "Passed. info: About to read event with PAPI_stop.\n");
-    ret = PAPI_stop( EventSet, values );
-    if (ret != PAPI_OK ) {
-        fprintf(stderr,"Error! PAPI_stop failed.\n");
-        if (verbose) fprintf(stderr, "PAPI_stop failed.\n");
-        exit(ret);
-    }
-    
-    if (verbose) fprintf (stderr, "PAPI_stop succeeded.\n");
-
-} // end conductTest.
-
-//-----------------------------------------------------------------------------
 // Main program.
 //-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
@@ -283,21 +205,6 @@ int main(int argc, char *argv[])
     // Do something.
     CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));              // Delete all events in set.
 
-    eventName = "rocm_smi:::device=0:sensor=0:fan_speed";
-    ret = PAPI_add_named_event(EventSet, eventName.c_str());
-    if (ret != PAPI_OK) {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
-        CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
-        exit(-1);
-    }
-
-    eventName = "rocm_smi:::device=0:sensor=0:fan_speed_max";
-    ret = PAPI_add_named_event(EventSet, eventName.c_str());
-    if (ret != PAPI_OK) {
-        fprintf(stderr, "FAILED to add event '%s', ret=%i='%s'.\n", eventName.c_str(), ret, PAPI_strerror(ret));
-        CALL_PAPI_OK(PAPI_cleanup_eventset(EventSet));          // Delete all events in set.
-        exit(-1);
-    }
 
     long long curmax[2];
     CALL_PAPI_OK(PAPI_start(EventSet));

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
-// rocmsmi_example.cpp is a minimal example of using PAPI with rocm_smi. SMI
-// is for "System Management Interface", it provide information on hardware 
+// rocm_smi_example.cpp is a minimal example of using PAPI with rocm_smi. SMI
+// is for "System Management Interface", it provides information on hardware 
 // sensors such as fan speed, temperature, and power consumption.
 //
 // Unfortunately, the power consumption is a "spot" reading, and most users
@@ -13,9 +13,9 @@
 // pthread to sample and record time & power while it runs.
 
 // This is intended as a simple example upon which programmers can expand; for
-// a more comprehensive approach see power_monitor_rocm.cpp, that can deal with
+// a more comprehensive approach see power_monitor_with_rocm_smi.cpp, that can deal with
 // multiple GPUs and allows power-capping and other output control. It is in
-// this same directory. power_monitor_rocm is a standalone code, run in the
+// this same directory. power_monitor_with_rocm_smi is a standalone code, run in the
 // background to monitor another application (two processes). (On some clusters
 // you must ensure the GPU *can* be shared by two processes simultaneously.)
 
@@ -41,7 +41,7 @@
 // An advantage of rocblas is it is also a "switch", automatically detecting
 // the hardware and using the appropriate tuned code for it.
 
-// > make rocmsmi_example 
+// > make or make rocm_smi_example
 
 // This code is intentionally heavily commented to be instructional.  We use
 // the library code to exercise the GPU with a realistic workload instead of a
@@ -63,11 +63,12 @@
 // (PAPI does not require c++; it is simple C; but PAPI++ will require c++).
 
 // Note for Clusters: Many clusters have "head nodes" (aka "login nodes") that
-// do not contain any gpus; the head node is used for compiling but the code is
-// actually run on a batch node (e.g. using SLURM and srun). Ensure when
-// running code that must access a GPU, including our utilities like
+// do not contain any gpus; if that is the case then the head node is used for 
+// compiling but the code will need to be ran on a batch node (e.g. using SLURM and srun).
+// Ensure when running code that must access a GPU, including our utilities like
 // papi_component_avail and papi_native_avail, and this example code, that the
-// code is run on a batch node, not the head node. 
+// code is run on a batch node, not the head node (if the head node does not have
+// the necessary gpu). 
 //-----------------------------------------------------------------------------
 
 // Necessary to specify a platform for the hipcc compiler.

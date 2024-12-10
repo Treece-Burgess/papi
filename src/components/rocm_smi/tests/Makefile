@@ -26,7 +26,8 @@ LDFLAGS = -ldl -g -L$(PAPI_ROCM_ROOT)/lib/rocblas -lrocblas
 
 TESTS = rocm_smi_all rocm_smi_example \
         power_monitor_with_rocm_smi \
-        rocm_smi_writeTests
+        rocm_smi_writeTests \
+        rocm_smi_list_events
 
 rocm_smi_tests: $(TESTS)
 
@@ -56,6 +57,9 @@ rocm_smi_writeTests.o: rocm_smi_writeTests.cpp $(UTILOBJS) $(PAPILIB)
 
 rocm_smi_writeTests: rocm_smi_writeTests.o $(UTILOBJS) $(PAPILIB)
 	$(HIPCC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB) $(LDFLAGS)
+
+rocm_smi_list_events: rocm_smi_list_events.o $(UTILOBJS) $(PAPILIB)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ $< $(UTILOBJS) $(PAPILIB)
 
 clean:
 	rm -f *.o $(TESTS)

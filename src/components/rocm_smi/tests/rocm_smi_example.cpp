@@ -12,12 +12,7 @@
 // routine (single precision general matrix multiply), while using a separate
 // pthread to sample and record time & power while it runs.
 
-// This is intended as a simple example upon which programmers can expand; for
-// a more comprehensive approach see power_monitor_with_rocm_smi.cpp, that can deal with
-// multiple GPUs and allows power-capping and other output control. It is in
-// this same directory. power_monitor_with_rocm_smi is a standalone code, run in the
-// background to monitor another application (two processes). (On some clusters
-// you must ensure the GPU *can* be shared by two processes simultaneously.)
+// This is intended as a simple example upon which programmers can expand. 
 
 // A separate process has the advantage of being able to monitor library code
 // and other application code that has no PAPI instrumentation code in it. The
@@ -31,22 +26,23 @@
 // consumption.
 
 // rocblas is generally part of the installed package from AMD, in
-// $PAPI_ROCM_ROOT/rocblas/, with subdirectories /lib and /include.  We don't
+// $PAPI_ROCM_ROOT/rocblas/, with subdirectories /lib and /include. We don't
 // use HipBlas (also included by AMD), HipBlas is a higher level "switch" that
 // calls either cuBlas or rocBlas. This would be an unnecessary complication
 // for this example.
-//
-// The corresponding Makefile is also instructional. 
 
 // An advantage of rocblas is it is also a "switch", automatically detecting
 // the hardware and using the appropriate tuned code for it.
 
+// Run either of the below commands to create an executable for 
+// rocm_smi_example.cpp.
 // > make or make rocm_smi_example
 
-// This code is intentionally heavily commented to be instructional.  We use
+// This code is intentionally heavily commented to be instructional. We use
 // the library code to exercise the GPU with a realistic workload instead of a
 // toy kernel. For examples of how to include your own kernels, see the
-// distribution directory $PAPI_ROCM_ROOT/hip/samples/, which contains
+// distribution directory $PAPI_ROCM_ROOT/share/hip/samples/ 
+// (path is accurate as of rocm-5.7.3), which contains
 // sub-directories with working applications.
 
 // To Compile, the environment variable PAPI_ROCM_ROOT must be defined to point
@@ -57,7 +53,7 @@
 
 // Because this program uses AMD HIP functions to manage memory on the GPU, it
 // must be compiled with the hipcc compiler. Typically this is found in:
-// $PAPI_ROCM_ROOT/bin/hipcc 
+// $PAPI_ROCM_ROOT/bin/hipcc.
 
 // hipcc is a c++ compiler, so c++ conventions for strings must be followed.
 // (PAPI does not require c++; it is simple C; but PAPI++ will require c++).
@@ -82,6 +78,7 @@
 #include <time.h>
 
 #include "papi.h"
+#include "papi_test.h"
 #include "rocblas.h"
 #include <hip/hip_runtime.h>
 
@@ -268,8 +265,46 @@ int main( int argc, char **argv )
 
     long long values[1]={0};  // declare a single event value.
 
-    // We define a string for the event we choose to monitor. 
-    char eventname[]="rocm_smi:::power_average:device=0:sensor=0";
+    // We want to monitor rocm_smi:::power_average:device=0:sensor=0
+    // Therefore, we will search for this event, if we do not find it
+    // we will error out. As of the time of writing this, Dopamine (AMD EPYC 7413)
+    // at ICL has this event available and is currently what the GitHub CI runs on.
+    int cmpIdx = PAPI_get_component_index("rocm_smi");
+    if (cmpIdx < 0) {
+        test_fail(__FILE__, __LINE__, "rocm_smi component not found", cmpIdx);
+    }
+
+    /* variables for rocm_smi event search */
+    int EventCode = PAPI_NATIVE_MASK;
+    int found_evt = 0; /* toggle to show that we found rocm_smi:::power_average:device=0:sensor=0 */
+    int modifier = PAPI_ENUM_FIRST;
+    char EventName[PAPI_MAX_STR_LEN];
+    
+
+    retval = PAPI_enum_cmp_event(&EventCode, modifier, cmpIdx);
+    if (retval != PAPI_OK) {
+        test_fail(__FILE__, __LINE__, "PAPI_enum_cmp_event for modifier PAPI_ENUM_FIRST", retval);
+    }
+
+    /* iterate over rocm_smi events */
+    modifier = PAPI_ENUM_EVENTS;
+    do {
+        retval = PAPI_event_code_to_name(EventCode, EventName);
+        if (retval != PAPI_OK) {
+            test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name", retval);
+        }
+
+        /* search for appropriate event */
+        if (strcmp(EventName, "rocm_smi:::power_average:device=0:sensor=0") == 0) {
+            found_evt = 1;
+            break;
+        }
+    } while(PAPI_enum_cmp_event(&EventCode, modifier, cmpIdx) == PAPI_OK);
+
+    /* double check rocm_smi:::power_average:device=0:sensor=0 was found */
+    if (!found_evt) {
+        test_fail(__FILE__, __LINE__, "Failed to get event rocm_smi:::power_average:device=0:sensor=0 check papi_native_avail output", 0);
+    }
 
     // Now we add the named event to the event set. It is also possible to add
     // names by their numerical code; but most applications use the named
@@ -278,9 +313,9 @@ int main( int argc, char **argv )
     // what we have done thus far is all setup, we have not tried to
     // communicate with the GPU yet.
 
-    retval = PAPI_add_named_event(EventSet, eventname); // Note we pass pointer to string. 
+    retval = PAPI_add_named_event(EventSet, EventName); // Note we pass pointer to string. 
     if (retval != PAPI_OK) {
-        fprintf(stderr, "Failed PAPI_add_named_event(EventSet, %s), retcode=%d ->'%s'\n", eventname, retval, PAPI_strerror(retval));
+        fprintf(stderr, "Failed PAPI_add_named_event(EventSet, %s), retcode=%d ->'%s'\n", EventName, retval, PAPI_strerror(retval));
         exit(retval);
     }
 
@@ -352,6 +387,9 @@ int main( int argc, char **argv )
     if (VERBOSE) fprintf(stderr, "Joined Thread.\n");
     // Success. Report what we read for the value.
     if (VERBOSE) printf("Read %d samples, =%.3f seconds. %llu nanosleepInterrupts.\n", myOrders.sampleIdx, (myOrders.sampleIdx*MS_SAMPLE_INTERVAL)/1000., countInterrupts);
+    /* print column headers */
+    //printf("%*s %*s %*s %*s\n", 0, "ns timeStamp", 26, "ns Diff", 29, "microWatts", 40, "Joules(Watts*Seconds)");
+    //printf("ns timeStamp -15ns Diff\t\tmicroWatts\tJoules (Watts*Seconds)\n");
     printf("ns timeStamp, ns Diff, microWatts, Joules (Watts*Seconds)\n");
 
     float duration, avgWatts=0.0, totJoules=0.0;
@@ -359,7 +397,7 @@ int main( int argc, char **argv )
     long long maxWatts=minWatts;
     for (i=0; i<myOrders.sampleIdx; i++) {
         x2 = i<<1;
-        printf("%llu,", myOrders.samples[x2]);
+        printf("%llu", myOrders.samples[x2]);
         if (i==0) printf("0,");
         else      printf("%llu,", myOrders.samples[x2]-myOrders.samples[x2-2]);
         if (myOrders.samples[x2+1] < minWatts) minWatts = myOrders.samples[x2+1];
@@ -379,8 +417,8 @@ int main( int argc, char **argv )
     duration = (float) (myOrders.samples[x2]-myOrders.samples[0]);
     duration *= 1.e-6;  // compute milliseconds from nano seconds.
     avgWatts /= (myOrders.sampleIdx-1.0);   // one less, first reading is zero.
-    printf("ms Duration=%.3f\n", duration);
-    printf("ms AvgInterval=%.3f\n", duration/(myOrders.sampleIdx-1));
+    printf("Duration(ms)=%.3f\n", duration);
+    printf("AvgInterval(ms)=%.3f\n", duration/(myOrders.sampleIdx-1));
     printf("avg Watts=%.3f, minWatts=%.3f, maxWatts=%.3f\n", avgWatts, (minWatts*1.e-6), (maxWatts*1.e-6));
     printf("total Joules=%.3f\n", totJoules); 
 
@@ -399,7 +437,7 @@ int main( int argc, char **argv )
     // those. Of course you should allow room in the 'values[]' array for the
     // maximum number of events you might read.
     
-    retval = PAPI_remove_named_event(EventSet, eventname); // remove the event we added.
+    retval = PAPI_remove_named_event(EventSet, EventName); // remove the event we added.
     if (retval != PAPI_OK) {
         fprintf(stderr, "Failed PAPI_remove_named_event(EventSet, eventname), retcode=%d ->'%s'\n", retval, PAPI_strerror(retval));
         exit(retval);

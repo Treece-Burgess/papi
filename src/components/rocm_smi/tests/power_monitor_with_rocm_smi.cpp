@@ -11,13 +11,15 @@
  *
  * @brief
 
- * This file reads power limits using ROCM_SMI and writes them
- * periodically to an output file.
+ * This file: 
+ *     1. Reads the minimum and maximum power limits for each device
+ *     2. Reads the power average for each device for a total duration of 5 seconds.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "papi.h"
 #include "papi_test.h"
@@ -63,9 +65,8 @@ void rocmGetDeviceCount(long long *deviceCount)
     }
 
     PAPI_cleanup_eventset(EventSet);                        // get rid of this set.
-} // end Get Devices.
+}
 
-// Host function
 int main( int argc, char** argv )
 {
 
@@ -87,8 +88,7 @@ int main( int argc, char** argv )
     /* PAPI Initialization */
     retval = PAPI_library_init( PAPI_VER_CURRENT );
     if( retval != PAPI_VER_CURRENT ) {
-        fprintf(stderr, "PAPI_library_init failure returned %i [%s].\n", retval, PAPI_strerror(retval));
-        exit(-1);
+        test_fail(__FILE__, __LINE__, "PAPI_library_init", retval);
     }
 
     /* print the current PAPI library version */
@@ -97,25 +97,16 @@ int main( int argc, char** argv )
             PAPI_VERSION_MINOR( PAPI_VERSION ),
             PAPI_VERSION_REVISION( PAPI_VERSION ) );
 
-    /* search for the rocm_smi component */ 
-    int numcmp = PAPI_num_components();
-    int cid = 0;
-    for (cid = 0; cid < numcmp; cid++) {
-        cmpinfo = PAPI_get_component_info(cid);
-        if (cmpinfo == NULL) {
-            test_fail(__FILE__, __LINE__,"PAPI_get_component_info failed", -1);
-        } else {
-            if (strstr( cmpinfo->name, "rocm_smi" )) break;
-        }
-    }
-
-    /* check to make sure we found the rocm_smi component */
-    if (cid==numcmp) {
-        test_fail(__FILE__, __LINE__, "rocm_smi component was not found", 0);
+    /* get the rocm_smi component index */
+    int cid = PAPI_get_component_index("rocm_smi");
+    if (cid < 0) {
+        test_fail(__FILE__, __LINE__, "PAPI_get_component_index, rocm_smi component not found", cid);
     }
 
     /* make sure that rocm_smi has been initialized */
     force_rocm_smi_init(cid);
+   
+    cmpinfo = PAPI_get_component_info(cid);
     if (cmpinfo->disabled) {
         test_fail(__FILE__, __LINE__, "rocm_smi component is disabled", 0);
     }
@@ -319,7 +310,7 @@ int main( int argc, char** argv )
         if (Duration > 0 && elapsedSec >= Duration) break;      // Exit if time is up.
     }
 
-    retval = PAPI_stop(EventSet, values);
+    retval = PAPI_stop(EventSet, NULL);
     if(retval != PAPI_OK) {
         test_fail(__FILE__, __LINE__, "PAPI_stop failure", retval);
     }

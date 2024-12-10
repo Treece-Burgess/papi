@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "papi.h"
+#include "papi_test.h"
 #include <hip/hip_runtime.h>
 #include <unistd.h>
 
@@ -97,32 +98,6 @@ vector_square(T *C_d, T *A_d, size_t N)
 void FreeGlobals(void) 
 {
    return;
-} // end routine.
-
-
-// Show help.
-//-----------------------------------------------------------------------------
-static void printUsage()
-{
-    printf("Demonstrate use of ROCM APIs\n");
-    printf("This program has no options, it will attempt to try every combination of rocm PAPI events\n");
-    printf("and report the results.                                                                  \n");
-} // end routine.
-
-
-//-----------------------------------------------------------------------------
-// Interpret command line flags.
-//-----------------------------------------------------------------------------
-void parseCommandLineArgs(int argc, char *argv[])
-{
-    if(argc < 2) return;
-
-    if((strcmp(argv[1], "--help") == 0) || 
-       (strcmp(argv[1], "-help") == 0)  || 
-       (strcmp(argv[1], "-h") == 0)) {
-        printUsage();
-        exit(0);
-    }
 } // end routine.
 
 //-----------------------------------------------------------------------------
@@ -237,66 +212,44 @@ int main(int argc, char *argv[])
     eventsFoundMax = eventsFoundAdd;                            // space allocated.
     eventsFound = (eventStore_t*) calloc(eventsFoundMax, sizeof(eventStore_t)); // make some space.
 
-    // Parse command line arguments
-    parseCommandLineArgs(argc, argv);
-
     // fprintf(stderr, "Setup PAPI counters internally (PAPI)\n");
     int EventSet = PAPI_NULL;
     int eventCount;
     int ret;
-    int k, m, cid=-1;
+    int k, m;
 
     /* PAPI Initialization */
     ret = PAPI_library_init(PAPI_VER_CURRENT);
     if(ret != PAPI_VER_CURRENT) {
-        fprintf(stderr, "PAPI_library_init failed, ret=%i [%s]\n", 
-            ret, PAPI_strerror(ret));
         FreeGlobals();
-        exit(-1);
+        test_fail(__FILE__, __LINE__, "PAPI_library_init", ret);
     }
 
+    /* print the current PAPI library version */ 
     printf("PAPI version: %d.%d.%d\n", 
         PAPI_VERSION_MAJOR(PAPI_VERSION), 
         PAPI_VERSION_MINOR(PAPI_VERSION), 
         PAPI_VERSION_REVISION(PAPI_VERSION));
-    fflush(stdout);
 
-    // Find rocm_smi component index.
-    k = PAPI_num_components();                                          // get number of components.
-    for (i=0; i<k && cid<0; i++) {                                      // while not found,
-        PAPI_component_info_t *aComponent = 
-            (PAPI_component_info_t*) PAPI_get_component_info(i);        // get the component info.     
-        if (aComponent == NULL) {                                       // if we failed,
-            fprintf(stderr,  "PAPI_get_component_info(%i) failed, "
-                "returned NULL. %i components reported.\n", i,k);
-            FreeGlobals();
-            exit(-1);    
-        }
+    /* get the rocm_smi component index */
+    int cid = PAPI_get_component_index("rocm_smi");
+    if (cid < 0) {
+        test_fail(__FILE__, __LINE__, "PAPI_get_component_index, rocm_smi component not found", cid);
+    } 
 
-       if (strcmp("rocm_smi", aComponent->name) == 0) cid=i;            // If we found our match, record it.
-    } // end search components.
-
-    if (cid < 0) {                                                      // if no PCP component found,
-        fprintf(stderr, "Failed to find rocm_smi component among %i "
-            "reported components.\n", k);
-        FreeGlobals();
-        PAPI_shutdown();
-        exit(-1); 
-    }
-
-    printf("Found ROCM_SMI Component at id %d\n", cid);
+    printf("Found rocm_smi component at id %d\n", cid);
 
     // Add events at a GPU specific level ... eg rocm:::device=0:Whatever
     eventCount = 0;
     int eventsRead=0;
 
-   // Begin enumeration of all events.
+    // Begin enumeration of all events.
 
-   printf("Events with numeric values were read; if they are zero, they may not  \n"
-          "be operational, or the exercises performed by this code do not affect \n"
-          "them. We report all 'rocm' events presented by the rocm component.    \n"
-          "\n"
-          "------------------------Event Name Found------------------------:---Value---\n");
+    printf("Events with numeric values were read; if they are zero, they may not  \n"
+           "be operational, or the exercises performed by this code do not affect \n"
+           "them. We report all 'rocm' events presented by the rocm component.    \n"
+           "\n"
+           "------------------------Event Name Found------------------------:---Value---\n");
 
     PAPI_event_info_t info;                                             // To get event enumeration info.
     m=PAPI_NATIVE_MASK;                                                 // Get the PAPI NATIVE mask.
@@ -314,10 +267,8 @@ int main(int argc, char *argv[])
             char *devstr = strstr(info.symbol, "device=");              // look for device enumerator.
             if (devstr != NULL) {                                       // If device specific,
                 device=atoi(devstr+7);                                      // Get the device id, for info.
-//              fprintf(stderr, "Found rocm symbol '%s', device=%i.\n", info.symbol , device);
                 if (device < 0 || device >= 32) continue;                   // skip any not in range.
             } else {                                                    // A few are system wide.
-//              fprintf(stderr, "Found rocm symbol '%s'.\n", info.symbol);
                 globalEvents++;                                         // Add to global events.
                 device=0;                                               // Any device will do.
             }
@@ -344,7 +295,8 @@ int main(int argc, char *argv[])
             if (strstr(info.symbol, "temp_critical:device=1:sensor=3") != NULL) continue;  
             if (strstr(info.symbol, "temp_critical_hyst:device=1:sensor=3") != NULL) continue;  
             if (strstr(info.symbol, "temp_emergency:device=1:sensor=3") != NULL) continue;  
-            if (strstr(info.symbol, "temp_emergency:device=1:sensor=3") != NULL) continue;  
+            if (strstr(info.symbol, "temp_emergency:device=1:sensor=3") != NULL) continue;
+            if (strstr(info.symbol, "block=UMC") != NULL) continue; 
 
             CALL_PAPI_OK(PAPI_create_eventset(&EventSet)); 
             CALL_PAPI_OK(PAPI_assign_eventset_component(EventSet, cid)); 
@@ -383,8 +335,6 @@ int main(int argc, char *argv[])
         } while(PAPI_enum_cmp_event(&k,PAPI_NTV_ENUM_UMASKS,cid)==PAPI_OK); // Get next umask entry (bits different) (should return PAPI_NOEVNT).
     } while(PAPI_enum_cmp_event(&m,PAPI_ENUM_EVENTS,cid)==PAPI_OK);         // Get next event code.
 
-//  fprintf(stderr, "%s:%i Finished Event Loops.\n", __FILE__, __LINE__);
-
     if (eventCount < 1) {                                                   // If we failed on all of them,
         fprintf(stderr, "Unable to add any ROCM events; they are not present in the component.\n");
         fprintf(stderr, "Unable to proceed with this test.\n");
@@ -403,10 +353,6 @@ int main(int argc, char *argv[])
 
     printf("\nTotal ROCM events identified: %i.\n\n", eventsFoundCount);
 
-    // EARLY SHUT DOWN.
-//  PAPI_shutdown();
-//  return(0);
-
     // Next section is pair testing information. 
     if (eventsFoundCount < 2) {                                             // If failed to get counts on any,
         printf("Insufficient events are exercised by the current test code to perform pair testing.\n"); // report a failure.
@@ -414,7 +360,6 @@ int main(int argc, char *argv[])
         PAPI_shutdown();                                                    // Returns no value.
         exit(0);                                                            // exit no matter what.
     }
-
 
     for (i=0; i<32; i++) {
         if (deviceEvents[i] == 0) continue;                             // skip if none found.
@@ -427,7 +372,6 @@ int main(int argc, char *argv[])
 
     // Begin pair testing. We consider every possible pairing of events
     // that, tested alone, returned a value greater than zero.
-//  fprintf(stderr, "Begin Pair Testing.\n");
 
     int mainEvent, pairEvent, mainDevice, pairDevice;
     long long readValues[2];
@@ -500,9 +444,7 @@ int main(int argc, char *argv[])
 
                 // We were able to add the pair, in type 0, get a measurement. 
                 readValues[0]= -1; readValues[1] = -1;
-//              fprintf(stderr, "conductTest on paired events: '%s' v. '%s'.\n", eventsFound[mainEvent].name, eventsFound[pairEvent].name);
                 conductTest(EventSet, device, readValues);                              // Conduct a test, on device given. 
-//              fprintf(stderr, "readValues[0]=%lli readValues[1]=%lli.\n", readValues[0], readValues[1]);
                 goodOnSame++;                                                           // Was accepted by cuda as a valid pairing.
 
                 // For the checks, we add 2 (so -1 becomes +1) to avoid any
@@ -567,6 +509,9 @@ int main(int argc, char *argv[])
         }
     } // end loop on type.
 
-    PAPI_shutdown();                                                                    // Returns no value.
-    return(0);                                                                          // exit OK.
+    /* if we make it here everything ran successfully */
+    PAPI_shutdown();
+    test_pass(__FILE__);
+
+    return(0);
 } // end MAIN.

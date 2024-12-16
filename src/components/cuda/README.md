@@ -78,6 +78,13 @@ This can be set using export; e.g.
 
 * Currently the CUDA component profiling only works with GPUs with compute capability > 7.0 using the NVIDIA Perfworks libraries.
 
+* Profiling with Cuda Toolkit versions less than 12.5 will result in a CUPTI unknown internal error in the following instances:
+
+  - A system which has an H100/H200 with a multi-GPU setup
+  - A system which has an H200
+  
+  Using Cuda versions greater than or equal to 12.5 will resolve this issue.
+
 ***
 
 ## FAQ

@@ -441,7 +441,7 @@ static int cuda_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
         SUBDBG("Error! Cannot PAPI_start more than one eventset at a time for every component.");
         papi_errno = PAPI_ECNFLCT;
         goto fn_fail;
-    }
+ 
     */
 
     papi_errno = cuptid_ctx_create(cuda_ctl->info, &(cuda_ctl->cuptid_ctx), cuda_ctl->events_id, cuda_ctl->num_events);

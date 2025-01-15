@@ -673,13 +673,29 @@ load_rsmi_sym(void)
         goto fn_fail;
     }
 
-    sprintf(pathname, "%s/lib/librocm_smi64.so", rocmsmi_root);
+    /* path for rocm versions < 6.0 */
+    //sprintf(pathname, "%s/lib/librocm_smi64.so", rocmsmi_root);
+    //rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
+    //if (rsmi_dlp == NULL){
+        /* path for rocm versions >= 6.0 */
+    //    sprintf(pathname, "%s/../../lib/librocm_smi64.so", rocmsmi_root);
+    //    rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
+    //}
 
-    rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
+    //if (rsmi_dlp == NULL) {
+        
+    //}
+
+    /* last ditch effort to find librocm_smi64.so */
     if (rsmi_dlp == NULL) {
-        sprintf(error_string, "%s", dlerror());
-        goto fn_fail;
+        rsmi_dlp = dlopen("librocm_smi64.so", RTLD_NOW | RTLD_GLOBAL);
+        if (rsmi_dlp == NULL) {
+            printf("We enter after last ditch.\n");
+            sprintf(error_string, "%s", dlerror());
+            goto fn_fail;
+        }
     }
+
 
     rsmi_num_monitor_dev_p                     = dlsym(rsmi_dlp, "rsmi_num_monitor_devices");
     rsmi_func_iter_value_get_p                 = dlsym(rsmi_dlp, "rsmi_func_iter_value_get");

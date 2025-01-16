@@ -666,7 +666,7 @@ load_rsmi_sym(void)
 {
     int papi_errno = PAPI_OK;
 
-    char pathname[PATH_MAX] = { 0 };
+    char pathname[PATH_MAX] = { 0 }, dlname[PAPI_MIN_STR_LEN] = "librocm_smi64.so";
     char *rocmsmi_root = getenv("PAPI_ROCMSMI_ROOT");
     if (rocmsmi_root == NULL) {
         sprintf(error_string, "Can't load librocm_smi64.so, PAPI_ROCMSMI_ROOT not set.");
@@ -674,28 +674,23 @@ load_rsmi_sym(void)
     }
 
     /* path for rocm versions < 6.0 */
-    //sprintf(pathname, "%s/lib/librocm_smi64.so", rocmsmi_root);
-    //rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
-    //if (rsmi_dlp == NULL){
-        /* path for rocm versions >= 6.0 */
-    //    sprintf(pathname, "%s/../../lib/librocm_smi64.so", rocmsmi_root);
-    //    rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
-    //}
+    sprintf(pathname, "%s/lib/%s", rocmsmi_root, dlname);
+    rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
 
-    //if (rsmi_dlp == NULL) {
-        
-    //}
+    /* path for rocm versions >= 6.0 */
+    if (rsmi_dlp == NULL) {
+        sprintf(pathname, "%s/../../lib/%s", rocmsmi_root, dlname);
+        rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL); 
+    }
 
     /* last ditch effort to find librocm_smi64.so */
     if (rsmi_dlp == NULL) {
-        rsmi_dlp = dlopen("librocm_smi64.so", RTLD_NOW | RTLD_GLOBAL);
+        rsmi_dlp = dlopen(dlname, RTLD_NOW | RTLD_GLOBAL);
         if (rsmi_dlp == NULL) {
-            printf("We enter after last ditch.\n");
             sprintf(error_string, "%s", dlerror());
             goto fn_fail;
         }
     }
-
 
     rsmi_num_monitor_dev_p                     = dlsym(rsmi_dlp, "rsmi_num_monitor_devices");
     rsmi_func_iter_value_get_p                 = dlsym(rsmi_dlp, "rsmi_func_iter_value_get");

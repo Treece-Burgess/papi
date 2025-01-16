@@ -86,9 +86,8 @@ COMPOBJS += linux-rocm-smi.o \
 
 CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/../include/rocm_smi
 CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/../include
-# for rocm versions >= 6.0
-CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/
-CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/../
+CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/ # rocm versions >= 6.0, for rocm_smi.h
+CFLAGS += -I$(PAPI_ROCMSMI_ROOT)/../ # rocm version >= 6.0, for rocm_smi/kfd_ioctl.h
 CFLAGS += -g
 LDFLAGS += $(LDL) -g
 

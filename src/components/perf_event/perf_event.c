@@ -2462,7 +2462,7 @@ _pe_handle_paranoid(papi_vector_t *component) {
 		return PAPI_ECMP;
 	}
 
-	/* 3 (vendor patch) means completely disabled */
+	/* 4 and 3 (vendor patch) means completely disabled */
 	/* 2 means no kernel measurements allowed   */
 	/* 1 means normal counter access            */
 	/* 0 means you can access CPU-specific data */
@@ -2471,10 +2471,11 @@ _pe_handle_paranoid(papi_vector_t *component) {
 	if (retval!=1) fprintf(stderr,"Error reading paranoid level\n");
 	fclose(fff);
 
-	if (paranoid_level==3) {
-		strCpy=strncpy(component->cmp_info.disabled_reason,
-			"perf_event support disabled by Linux with paranoid=3",PAPI_MAX_STR_LEN);
-      if (strCpy == NULL) HANDLE_STRING_ERROR;
+	if (paranoid_level >= 3) {
+		retval=snprintf(component->cmp_info.disabled_reason, PAPI_MAX_STR_LEN,
+			"perf_event support disabled by Linux with paranoid=%d", paranoid_level);
+		if (retval < 0 || retval >= PAPI_MAX_STR_LEN) HANDLE_STRING_ERROR;
+
 		return PAPI_ECMP;
 	}
 

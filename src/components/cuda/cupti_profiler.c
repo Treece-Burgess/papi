@@ -153,6 +153,7 @@ static int get_event_collection_method(const char *evt_name);
 static int get_added_events_rmr(cuptip_gpu_state_t *gpu_ctl);
 static int get_counter_availability(cuptip_gpu_state_t *gpu_ctl);
 static int get_measured_values(cuptip_gpu_state_t *gpu_ctl, long long *counts);
+static int determine_dev_cc(int dev_id); 
 
 /* nvperf function pointers */
 NVPA_Status ( *NVPW_GetSupportedChipNamesPtr ) (NVPW_GetSupportedChipNames_Params* params);
@@ -619,6 +620,11 @@ static int nvpw_cuda_metricscontext_create(cuptip_control_t state)
     cuptip_gpu_state_t *gpu_ctl;
 
     for (gpu_id = 0; gpu_id < num_gpus; gpu_id++) {
+        // Skip devices that will require the Events API to be profiled
+        if (determine_dev_cc(gpu_id)) { 
+            continue;
+        } 
+
         gpu_ctl = &(state->gpu_ctl[gpu_id]);
         found = find_same_chipname(gpu_id);
         if (found > -1) {
@@ -665,6 +671,11 @@ static int nvpw_cuda_metricscontext_destroy(cuptip_control_t state)
     cuptip_gpu_state_t *gpu_ctl;
 
     for (gpu_id = 0; gpu_id < num_gpus; gpu_id++) {
+        // Skip devices that will require the Events API to be profiled
+        if (determine_dev_cc(gpu_id)) { 
+            continue;
+        }
+
         gpu_ctl = &(state->gpu_ctl[gpu_id]);
         found = find_same_chipname(gpu_id);
         if (found > -1) {
@@ -1288,8 +1299,13 @@ static int find_same_chipname(int gpu_id)
 static int init_all_metrics(void)
 {
     int gpu_id, papi_errno = PAPI_OK;
-
+    
     for (gpu_id = 0; gpu_id < num_gpus; gpu_id++) {
+        // Skip devices that will require the Events API to be profiled
+        if (determine_dev_cc(gpu_id)) {
+            continue;
+        } 
+
         papi_errno = get_chip_name(gpu_id, cuptiu_table_p->avail_gpu_info[gpu_id].chip_name);
         if (papi_errno != PAPI_OK) {
             goto fn_exit;
@@ -1297,6 +1313,11 @@ static int init_all_metrics(void)
     }
     int found;
     for (gpu_id = 0; gpu_id < num_gpus; gpu_id++) {
+        // Skip devices that will require the Events API to be profiled
+        if (determine_dev_cc(gpu_id)) {
+            continue;
+        } 
+
         found = find_same_chipname(gpu_id);
         if (found > -1) {
             cuptiu_table_p->avail_gpu_info[gpu_id].pmetricsContextCreateParams = cuptiu_table_p->avail_gpu_info[found].pmetricsContextCreateParams;
@@ -1407,7 +1428,7 @@ int cuptip_init(void)
     papi_errno = load_cupti_perf_sym();
     papi_errno += load_nvpw_sym();
     if (papi_errno != PAPI_OK) {
-        cuptic_disabled_reason_set("Unable to load CUDA library functions.");
+        cuptic_err_set_last("Unable to load CUDA library functions.");
         goto fn_fail;
     }
 
@@ -1418,7 +1439,7 @@ int cuptip_init(void)
     }
 
     if (num_gpus <= 0) {
-        cuptic_disabled_reason_set("No GPUs found on system.");
+        cuptic_err_set_last("No GPUs found on system.");
         goto fn_fail;
     }
    
@@ -1426,7 +1447,7 @@ int cuptip_init(void)
     papi_errno = initialize_cupti_profiler_api();
     papi_errno += initialize_perfworks_api();
     if (papi_errno != PAPI_OK) {
-        cuptic_disabled_reason_set("Unable to initialize CUPTI profiler libraries.");
+        cuptic_err_set_last("Unable to initialize CUPTI profiler libraries.");
         goto fn_fail;
     }
 
@@ -1576,6 +1597,7 @@ int cuptip_ctx_create(cuptic_info_t thr_info, cuptip_control_t *pstate, uint64_t
     if (papi_errno != PAPI_OK) {
         goto fn_exit;
     }
+
     state->info = thr_info;
     state->counters = counters;
 
@@ -1672,7 +1694,6 @@ int cuptip_ctx_read(cuptip_control_t state, long long **counters)
     CUcontext userCtx = NULL, ctx = NULL;
 
     cudaCheckErrors( cuCtxGetCurrentPtr(&userCtx), goto fn_fail_misc );
-
     for (gpu_id = 0; gpu_id < num_gpus; gpu_id++) {
         gpu_ctl = &(state->gpu_ctl[gpu_id]);
         if (gpu_ctl->added_events->count == 0) {
@@ -1918,9 +1939,11 @@ int cuptip_shutdown(void)
 */
 int evt_id_create(event_info_t *info, uint64_t *event_id)
 {
+
     *event_id  = (uint64_t)(info->device   << DEVICE_SHIFT);
     *event_id |= (uint64_t)(info->flags    << QLMASK_SHIFT);
     *event_id |= (uint64_t)(info->nameid   << NAMEID_SHIFT);
+
     return PAPI_OK;
 }
 
@@ -1967,6 +1990,11 @@ int init_event_table(void)
     
     /* loop through all available devices on the current system */
     for (dev_id = 0; dev_id < num_gpus; dev_id++) {
+        // Skip devices that will require the Events API to be profiled
+        if (determine_dev_cc(dev_id)) { 
+            continue;
+        } 
+
         found = find_same_chipname(dev_id);
         /* unique device found, collect metadata  */
         if (found == -1) {
@@ -2613,3 +2641,17 @@ static int evt_name_to_device(const char *name, int *device)
     }
     return PAPI_OK;
 }
+
+static int determine_dev_cc(int dev_id) 
+{
+    int cc_major;
+    cudaError_t cuda_errno;
+
+    cudaDeviceGetAttributePtr(&cc_major, cudaDevAttrComputeCapabilityMajor, dev_id);
+
+    if (cc_major >= 7)
+        return 0;
+    else
+        return 1;
+}
+

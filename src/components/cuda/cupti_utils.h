@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 
+
 typedef int64_t cuptiu_bitmap_t;
 typedef int (*cuptiu_dev_get_map_cb)(uint64_t event_id, int *dev_id);
 typedef NVPW_CUDA_MetricsContext_Create_Params MCCP_t;

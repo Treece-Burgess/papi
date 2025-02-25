@@ -55,11 +55,10 @@ extern CUptiResult ( *cuptiGetVersionPtr ) (uint32_t* );
 
 /* utility functions to check runtime api, disabled reason, etc. */
 int cuptic_init(void);
-int cuptic_is_runtime_perfworks_api(void);
-int cuptic_is_runtime_events_api(void);
+int cuptic_determine_runtime_api(void);
 int cuptic_device_get_count(int *num_gpus);
-void cuptic_disabled_reason_set(const char *msg);
-void cuptic_disabled_reason_get(const char **pmsg);
+int cuptic_err_get_last(const char **error_str);
+int cuptic_err_set_last(const char *error_str);
 void *cuptic_load_dynamic_syms(const char *parent_path, const char *dlname, const char *search_subpaths[]);
 int cuptic_shutdown(void);
 

@@ -165,11 +165,19 @@ static int cuda_shutdown_component(void)
 
 static int cuda_init_private(void)
 {
-    int papi_errno = PAPI_OK, len, count = 0;
-    const char *disabled_reason;
+    int papi_errno = PAPI_OK, retval, count = 0;
+    const char *err_string;
 
     _papi_hwi_lock(COMPONENT_LOCK);
     SUBDBG("ENTER\n");
+    if (_cuda_vector.cmp_info.initialized) goto fn_exit;
+
+    retval = sprintf(_cuda_vector.cmp_info.disabled_reason, "%s", "");
+    if (retval < 0) 
+        SUBDBG("The call to sprintf for the disabled_reason failed.\n");
+    retval = sprintf(_cuda_vector.cmp_info.partially_disabled_reason, "%s", "");
+    if (retval < 0)
+        SUBDBG("The call to sprintf for the partially_disabled_reason failed.\n");
 
     if (_cuda_vector.cmp_info.initialized) {
         SUBDBG("Skipping cuda_init_private, as the Cuda event table has already been initialized.\n");
@@ -178,18 +186,29 @@ static int cuda_init_private(void)
 
     papi_errno = cuptid_init();
     if (papi_errno != PAPI_OK) {
-        /* get and assign the string literal for the disabled reason */
-        cuptid_disabled_reason_get(&disabled_reason);
-        len = snprintf(_cuda_vector.cmp_info.disabled_reason, PAPI_MAX_STR_LEN, "%s", disabled_reason);
-        if (len < 0 || len > PAPI_MAX_STR_LEN) {
-            SUBDBG("The disabled reason has been truncated.\n");
+        // Get last error message
+        cuptid_err_get_last(&err_string);
+        // Cuda component is partially disabled
+        if (papi_errno == PAPI_PARTIAL) {
+            _cuda_vector.cmp_info.partially_disabled = 1;
+            retval = snprintf(_cuda_vector.cmp_info.partially_disabled_reason, PAPI_MAX_STR_LEN, "%s", err_string);
+            if (retval < 0 || retval > PAPI_MAX_STR_LEN) {
+                SUBDBG("The partially disabled reason has been truncated.\n");
+            }
+            // Reset variable that holds error code
+            papi_errno = PAPI_OK; 
         }
-        goto fn_fail;
+        // Cuda component is disabled
+        else {
+            retval = snprintf(_cuda_vector.cmp_info.disabled_reason, PAPI_MAX_STR_LEN, "%s", err_string);
+            if (retval < 0 || retval > PAPI_MAX_STR_LEN) {
+                SUBDBG("The disabled reason has been truncated.\n");
+            }
+            goto fn_fail;
+        }
     }
 
-    strcpy(_cuda_vector.cmp_info.disabled_reason, "");
-
-    /* get the number of native events count */
+    // Get the metric count found on a machine
     papi_errno = cuda_get_evt_count(&count);
     _cuda_vector.cmp_info.num_native_events = count;
 

@@ -1,0 +1,9 @@
+2025-07-03  Treece Burgess <tburgess@icl.utk.edu>
+
+	* doc/Doxyfile-common, papi.spec, src/Makefile.in, src/configure.in,
+	  src/papi.h: Updated the version numbers
+
+2025-06-26  Treece Burgess <tburgess@icl.utk.edu>
+
+	* src/papi.c: PAPI_num_events: Remove ifdef that is triggered if
+	  debug mode is set.

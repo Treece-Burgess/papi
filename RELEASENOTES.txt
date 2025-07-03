@@ -4,6 +4,7 @@ order.
 For details on installing PAPI on your machine, consult the INSTALL.txt file
 in this directory.
 
+Testing
 
 ===============================================================================
 PAPI 7.2.0 RELEASE NOTES                                               Jun 2025

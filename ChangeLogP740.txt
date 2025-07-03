@@ -1,0 +1,41 @@
+2025-07-03  Treece Burgess <tburgess@icl.utk.edu>
+
+	* doc/Doxyfile-common, papi.spec, src/Makefile.in, src/configure.in,
+	  src/papi.h: Updating version numbers
+
+2025-06-26  Treece Burgess <tburgess@icl.utk.edu>
+
+	* src/papi.c: PAPI_num_events: Remove ifdef that is triggered if
+	  debug mode is set.
+	* ChangeLogP400.txt => ChangeLogs/ChangeLogP400.txt,
+	  ChangeLogP410.txt => ChangeLogs/ChangeLogP410.txt,
+	  ChangeLogP411.txt => ChangeLogs/ChangeLogP411.txt,
+	  ChangeLogP412.txt => ChangeLogs/ChangeLogP412.txt,
+	  ChangeLogP4121.txt => ChangeLogs/ChangeLogP4121.txt,
+	  ChangeLogP413.txt => ChangeLogs/ChangeLogP413.txt,
+	  ChangeLogP414.txt => ChangeLogs/ChangeLogP414.txt,
+	  ChangeLogP420.txt => ChangeLogs/ChangeLogP420.txt,
+	  ChangeLogP421.txt => ChangeLogs/ChangeLogP421.txt,
+	  ChangeLogP440.txt => ChangeLogs/ChangeLogP440.txt,
+	  ChangeLogP500.txt => ChangeLogs/ChangeLogP500.txt,
+	  ChangeLogP501.txt => ChangeLogs/ChangeLogP501.txt,
+	  ChangeLogP510.txt => ChangeLogs/ChangeLogP510.txt,
+	  ChangeLogP511.txt => ChangeLogs/ChangeLogP511.txt,
+	  ChangeLogP520.txt => ChangeLogs/ChangeLogP520.txt,
+	  ChangeLogP530.txt => ChangeLogs/ChangeLogP530.txt,
+	  ChangeLogP532.txt => ChangeLogs/ChangeLogP532.txt,
+	  ChangeLogP540.txt => ChangeLogs/ChangeLogP540.txt,
+	  ChangeLogP541.txt => ChangeLogs/ChangeLogP541.txt,
+	  ChangeLogP543.txt => ChangeLogs/ChangeLogP543.txt,
+	  ChangeLogP550.txt => ChangeLogs/ChangeLogP550.txt,
+	  ChangeLogP551.txt => ChangeLogs/ChangeLogP551.txt,
+	  ChangeLogP560.txt => ChangeLogs/ChangeLogP560.txt,
+	  ChangeLogP570.txt => ChangeLogs/ChangeLogP570.txt,
+	  ChangeLogP600.txt => ChangeLogs/ChangeLogP600.txt,
+	  ChangeLogP700.txt => ChangeLogs/ChangeLogP700.txt,
+	  ChangeLogP701.txt => ChangeLogs/ChangeLogP701.txt,
+	  ChangeLogP710.txt => ChangeLogs/ChangeLogP710.txt,
+	  ChangeLogP720.txt => ChangeLogs/ChangeLogP720.txt,
+	  ChangeLogP720b1.txt => ChangeLogs/ChangeLogP720b1.txt,
+	  ChangeLogP720b2.txt => ChangeLogs/ChangeLogP720b2.txt: ChangeLogs:
+	  Move the ChangeLogs to a new directory in root named ChangeLogs.

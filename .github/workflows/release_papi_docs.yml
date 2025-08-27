@@ -1,0 +1,35 @@
+name: PAPI Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      Version:
+        description: PAPI version number for this release
+        required: true
+        type: string
+    
+jobs:
+  update_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PAPI Code
+        uses: actions/checkout@v5
+
+      # This is where I would do the Python magic
+      - name: Make a Change
+        run: echo "Test" >> RELEASENOTES.txt
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'Updating documentation for PAPI Release ${{ github.event.inputs.Version }}'
+          #TODO: Add date to this
+          branch: papi-release-${{ github.event.inputs.Version }}
+          delete-branch: True
+          title: 'PAPI Release ${{ github.event.inputs.Version }}: Updating documentation'
+          body: |
+            Documentation updating for PAPI Release ${{ github.event.inputs.Version }}
+            - Includes configure, configure.in, man pages, releasenotes and changelog
+          reviewers: |
+            Treece-Burgess
+          draft: false

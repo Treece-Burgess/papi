@@ -2886,7 +2886,9 @@ static int create_raw_metric_requests(NVPW_MetricsEvaluator *pMetricsEvaluator, 
     getMetricRawDependenciesParams.metricEvalRequestStructSize = NVPW_MetricEvalRequest_STRUCT_SIZE;
     getMetricRawDependenciesParams.metricEvalRequestStrideSize = sizeof(NVPW_MetricEvalRequest);
     getMetricRawDependenciesParams.ppRawDependencies = NULL;
+#if CUPTI_API_VERSION >= 16
     getMetricRawDependenciesParams.ppOptionalRawDependencies = NULL;
+#endif
     getMetricRawDependenciesParams.pPriv = NULL;
     nvpwCheckErrors( NVPW_MetricsEvaluator_GetMetricRawDependenciesPtr(&getMetricRawDependenciesParams), return PAPI_EMISC );
 

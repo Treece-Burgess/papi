@@ -6884,6 +6884,98 @@ if test "${with_components+set}" = set; then :
 fi
 
 
+# Argument $1 is the path from the environment variable you want to search
+# Argument $2 is the vendor name that the path should contain
+# Argument $3 is the subpath to your desired file
+search_component_env_paths()
+{
+    path="$1"
+    vendor_name="$2"
+    subpath="$3"
+
+    path_reconstruction=""
+    # If vendor_name is in path then we perform path reconstruction
+    case "$path" in
+      *"$vendor_name"*)
+        # Attempt to reconstruct path to desired file
+        ( IFS=/
+            for dir in $path; do
+                if test -z "$dir"; then
+                    continue
+                fi
+
+                path_reconstruction="${path_reconstruction}/${dir}"
+                if test -e "${path_reconstruction}/${subpath}"; then
+                    echo "${path_reconstruction}/${subpath}"
+                    return 0
+                fi
+            done
+        )
+     ;;
+     esac
+
+     # We did not find a match
+     echo
+     return 1
+}
+
+case "$components" in
+    *"cuda"*)
+    vendor_name="cuda"
+    subpath="include/cuda.h"
+    cuda_header_path=""
+    # Check PAPI_CUDA_RUNTIME
+    papi_cuda_runtime="${PAPI_CUDA_RUNTIME}"
+    if test -n "$papi_cuda_runtime"; then
+        echo "USING PAPI_CUDA_RUNTIME.\n"
+        cuda_header_path=$(search_component_env_paths "$papi_cuda_runtime" "$vendor_name" "$subpath")
+    fi
+
+    # Check PAPI_CUDA_CUPTI
+    papi_cuda_cupti="${PAPI_CUDA_CUPTI}"
+    if test -z "$cuda_header_path" && test -n "$papi_cuda_cupti"; then
+        echo "USING PAPI_CUDA_CUPTI.\n"
+        cuda_header_path=$(search_component_env_paths "$papi_cuda_cupti" "$vendor_name" "$subpath")
+    fi
+
+    # Check PAPI_CUDA_PERFWORKS
+    papi_cuda_perfworks="${PAPI_CUDA_PERFWORKS}"
+    if test -z "$cuda_header_path" && test -n "$papi_cuda_perfworks"; then
+        echo "USING PAPI_CUDA_PERFWORKS.\n"
+        cuda_header_path=$(search_component_env_paths "$papi_cuda_perfworks" "$vendor_name" "$subpath")
+    fi
+
+    # Check PAPI_CUDA_ROOT
+    papi_cuda_root="${PAPI_CUDA_ROOT}"
+    if test -z "$cuda_header_path" && test -n "$papi_cuda_root"; then
+        echo "USING PAPI_CUDA_ROOT\n"
+        cuda_header_path=$(search_component_env_paths "$papi_cuda_root" "$vendor_name" "$subpath")
+    fi
+
+    # Check LD_LIBRARY_PATH
+    ld_library_path="${LD_LIBRARY_PATH}"
+    if test -z "$cuda_header_path" && test -n "$ld_library_path"; then
+        echo "USING LD_LIBRARY_PATH\n"
+        OLDIFS="$IFS"
+        IFS=:
+        for path in $ld_library_path; do
+            cuda_header_path=$(search_component_env_paths "$path" "$vendor_name" "$subpath")
+            if test -n "$cuda_header_path"; then
+                break
+            fi
+        done
+        IFS="$OLDIFS"
+    fi
+
+    max_cuda_toolkit_version_support=11040
+    cuda_toolkit_version=$(cat "$cuda_header_path"  | grep -m1 CUDA_VERSION | awk '{print $3}')
+    if test "$cuda_toolkit_version" -lt "$max_cuda_toolkit_version_support"; then
+        components=$(echo "$components" | sed 's/ cuda//')
+        cuda_not_compiled_message="The cuda component will not be compiled in as the Cuda Toolkit in use is not supported. Use a Cuda Toolkit >= 11.4."
+    fi
+    ;;
+esac
+
 # Enable sysdetect unless the user has explicitly told us not to.
 if test "$with_sysdetect" = "yes"; then
   if test "$perf_events" != "no"; then
@@ -7411,10 +7503,10 @@ if test "x$F77" != "x" -a "x$enable_fortran" = "xyes" ; then
 fi
 
 
-
-
-
-
+if test "x$cuda_not_compiled_message" != "x"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $cuda_not_compiled_message" >&5
+$as_echo "$as_me: WARNING: $cuda_not_compiled_message" >&2;}
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: $FILENAME will be included in the generated Makefile" >&5
 $as_echo "$as_me: $FILENAME will be included in the generated Makefile" >&6;}

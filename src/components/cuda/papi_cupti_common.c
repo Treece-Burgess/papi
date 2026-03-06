@@ -825,6 +825,19 @@ int cuptic_init(void)
         return papi_errno;
     }
 
+    char errMsg[PAPI_HUGE_STR_LEN] = { 0 };
+    int cudaRuntimeVersion, lower_bound_cuda_toolkit_version_support = 11040, strLen;
+    cudaArtCheckErrors( cudaRuntimeGetVersionPtr(&cudaRuntimeVersion), return PAPI_EMISC );
+    // Verify that a user is using a Cuda Toolkit >= lower_bound_cuda_toolkit_version_support
+    if (cudaRuntimeVersion < lower_bound_cuda_toolkit_version_support) {
+        strLen = snprintf(errMsg, sizeof(errMsg), "The cuda component only supports Cuda Toolkits >= %d.%d.", lower_bound_cuda_toolkit_version_support / 1000, (lower_bound_cuda_toolkit_version_support % 1000) / 10);
+        if (strLen < 0 || (size_t) strLen >= sizeof(errMsg)) {
+            SUBDBG("Error message was not fully written into the buffer errMsg.\n");
+        }
+        cuptic_err_set_last(errMsg);
+        return PAPI_ECMP;
+    }
+
     papi_errno = verify_cuda_toolkit_supports_architectures_on_machine();
     if (papi_errno != PAPI_OK) {
         return papi_errno;
@@ -848,10 +861,9 @@ int cuptic_init(void)
         char *cc_support = (PAPI_CUDA_API != NULL) ? "<=7.0" : ">=7.0";
         char *helpMsg  = (PAPI_CUDA_API != NULL) ? "To enable support for CCs >= 7.0 run 'unset PAPI_CUDA_API'" : "To enable support for CCs <= 7.0 run 'export PAPI_CUDA_API=LEGACY'";
 
-        char errMsg[PAPI_HUGE_STR_LEN];
-        int strLen = snprintf(errMsg, PAPI_HUGE_STR_LEN,
-                              "System includes multiple compute capabilities: <7.0, =7.0, >7.0."
-                              " Only support for CC %s enabled. %s.", cc_support, helpMsg);
+        strLen = snprintf(errMsg, PAPI_HUGE_STR_LEN,
+                          "System includes multiple compute capabilities: <7.0, =7.0, >7.0."
+                          " Only support for CC %s enabled. %s.", cc_support, helpMsg);
         if (strLen < 0 || strLen >= PAPI_HUGE_STR_LEN) {
             SUBDBG("Failed to fully write the partially disabled error message.\n");
             return PAPI_EBUF;

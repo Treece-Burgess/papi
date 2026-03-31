@@ -32,6 +32,7 @@ int main( int argc, char **argv )
             exit(EXIT_FAILURE);
         }
 
+        printf("We have: %s\n", argv[i]);
         int cidx = PAPI_get_component_index(argv[i]);
         if (cidx < 0) {
             fprintf(stderr, "Error in call to PAPI_get_component_index: %s\n", PAPI_strerror(cidx));

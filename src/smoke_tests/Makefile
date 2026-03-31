@@ -1,9 +1,11 @@
 
-EXECUTABLES = simple threads
+EXECUTABLES = threads test_papi_edelay_init_components test_eventsets
 
 CC ?= gcc
 
-PAPI_ROOT := $(shell dirname $(shell dirname $(shell which papi_component_avail)))
+
+#PAPI_ROOT := $(shell dirname $(shell dirname $(shell which papi_component_avail)))
+PAPI_ROOT = /home/users/tburgess/papi_fork/papi/src/test-install
 CFLAGS ?= -O0 -pthread -I$(PAPI_ROOT)/include
 CPPFLAGS = -I$(PAPI_ROOT)/include
 LIBS = -L$(PAPI_ROOT)/lib  -lm -ldl -lpapi -Wl,-rpath=$(PAPI_ROOT)/lib -pthread
@@ -17,7 +19,11 @@ i.SUFFIXES: .c .o
 	.c.o:
 	    $(CC) $(CFLAGS) -c $*.c
 
-simple: simple.o 
-	$(CC) $(CFLAGS) -o simple simple.o $(LIBS)
+#simple: simple.o 
+#	$(CC) $(CFLAGS) -o simple simple.o $(LIBS)
 threads: threads.o 
 	$(CC) $(CFLAGS) -o threads threads.o $(LIBS)
+test_papi_edelay_init_components: test_papi_edelay_init_components.o
+	$(CC) $(CFLAGS) -o test_papi_edelay_init_components test_papi_edelay_init_components.o $(LIBS)
+test_eventsets: test_eventsets.o
+	$(CC) $(CFLAGS) -o test_eventsets test_eventsets.o $(LIBS)

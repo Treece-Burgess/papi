@@ -4,8 +4,8 @@ EXECUTABLES = threads test_papi_edelay_init_components test_eventsets
 CC ?= gcc
 
 
-#PAPI_ROOT := $(shell dirname $(shell dirname $(shell which papi_component_avail)))
-PAPI_ROOT = /home/users/tburgess/papi_fork/papi/src/test-install
+PAPI_ROOT := $(shell dirname $(shell dirname $(shell which papi_component_avail)))
+#PAPI_ROOT = /home/users/tburgess/papi_fork/papi/src/test-install
 CFLAGS ?= -O0 -pthread -I$(PAPI_ROOT)/include
 CPPFLAGS = -I$(PAPI_ROOT)/include
 LIBS = -L$(PAPI_ROOT)/lib  -lm -ldl -lpapi -Wl,-rpath=$(PAPI_ROOT)/lib -pthread

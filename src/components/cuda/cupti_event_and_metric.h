@@ -59,7 +59,7 @@ typedef struct event_and_metric_table_s {
     int cuda_devs[30];
     CUpti_EventGroupSets *eventGroupSets;
     CUpti_MetricID metricIDs[PAPI_CUDA_MAX_COUNTERS];
-    int *idsThatMakeupAUserAddedEventArray[PAPI_CUDA_MAX_COUNTERS];
+    CUpti_EventID *idsThatMakeupAUserAddedEventArray[PAPI_CUDA_MAX_COUNTERS];
     int *cumulativeValuesArray[PAPI_CUDA_MAX_COUNTERS];
     int totalNumberOfIdsThatMakeupTheUserAddedEventArray[PAPI_CUDA_MAX_COUNTERS];
     int totalNumberOfUserAddedNativeEvents;

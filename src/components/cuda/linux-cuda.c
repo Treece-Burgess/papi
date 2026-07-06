@@ -263,52 +263,55 @@ static int cuda_ntv_enum_events(unsigned int *event_code, int modifier)
     SUBDBG("ENTER: event_code: %u, modifier: %d\n", *event_code, modifier);
     int papi_errno = check_n_initialize();
     if (papi_errno != PAPI_OK) {
-        goto fn_exit;
+        SUBDBG("Check and initialize failed.\n");
+        return papi_errno;
     }
 
     uint32_t code = *(uint32_t *) event_code;
     papi_errno = cuptid_evt_enum(&code, modifier);
+    if (papi_errno != PAPI_OK) {
+        SUBDBG("Enumeration failed with code %u and modifier %d.\n", code, modifier);
+        return papi_errno;
+    }
     *event_code = (unsigned int) code;
-    
-fn_exit:
-    SUBDBG("EXIT: %s\n", PAPI_strerror(papi_errno));
-    return papi_errno;
-fn_fail:
-    goto fn_exit;
+
+    return PAPI_OK; 
 }
 
 static int cuda_ntv_name_to_code(const char *name, unsigned int *event_code)
 {
     int papi_errno = check_n_initialize();
     if (papi_errno != PAPI_OK) {
-        goto fn_exit;
+        SUBDBG("Check and initialize failed.\n");
+        return papi_errno;
     }
 
     uint32_t code;
     papi_errno = cuptid_evt_name_to_code(name, &code);
+    if (papi_errno != PAPI_OK) {
+        SUBDBG("Failed to convert the name (%s) to code.\n", name);
+        return papi_errno;
+    }
     *event_code = (unsigned int) code;
 
-    fn_exit:
-        SUBDBG("EXIT: %s\n", PAPI_strerror(papi_errno));
-        return papi_errno;
-    fn_fail:
-        goto fn_exit;
+    return PAPI_OK;
 }
 
 static int cuda_ntv_code_to_name(unsigned int event_code, char *name, int len)
 {
     int papi_errno = check_n_initialize();
     if (papi_errno != PAPI_OK) {
+        SUBDBG("Check and initialize failed.\n");
         return papi_errno;
     }
 
     papi_errno = cuptid_evt_code_to_name((uint32_t) event_code, name, len);
-
-    fn_exit:
-        SUBDBG("EXIT: %s\n", PAPI_strerror(papi_errno));
+    if (papi_errno != PAPI_OK) {
+        SUBDBG("Failed to convert the code (%d) to name.\n", event_code);
         return papi_errno;
-    fn_fail:
-        goto fn_exit;
+    }
+
+    return PAPI_OK;
 }
 
 static int cuda_ntv_code_to_descr(unsigned int event_code, char *descr, int len)
@@ -591,7 +594,7 @@ int update_native_events(cuda_control_t *ctl, NativeInfo_t *ntv_info,
 static int cuda_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
 {
     COMPDBG("Entering.\n");
-    int papi_errno, i;
+    int papi_errno;
     cuda_context_t *cuda_ctx = (cuda_context_t *) ctx;
     cuda_control_t *cuda_ctl = (cuda_control_t *) ctl;
 

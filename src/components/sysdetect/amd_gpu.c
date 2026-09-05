@@ -61,27 +61,38 @@ static int load_hsa_sym( char *status );
 static int unload_hsa_sym( void );
 #endif /* HAVE_ROCM */
 
-#ifdef HAVE_ROCM_SMI
+static void *smi_dlp = NULL;
+#ifdef HAVE_AMD_SMI
+#include "amdsmi.h"
+
+static amdsmi_status_t (*smi_initPtr) (uint64_t init_flags) = NULL;
+static amdsmi_status_t (*smi_shut_downPtr) (void) = NULL;
+static amdsmi_status_t (*smi_get_pci_device_idPtr) (amdsmi_processor_handle processor_handle, uint64_t *bdfid) = NULL;
+static amdsmi_status_t (*amdsmi_get_socket_handlesPtr) (uint32_t *socket_count, amdsmi_socket_handle* socket_handles) = NULL;
+static amdsmi_status_t (*amdsmi_get_processor_handlesPtr) (amdsmi_socket_handle socket_handle, uint32_t *processor_count, amdsmi_processor_handle* processor_handles) = NULL;
+
+#define SMI_CALL(call, err_handle) do {         \
+    amdsmi_status_t _status = (call);           \
+    if (_status == AMDSMI_STATUS_SUCCESS)       \
+        break;                                  \
+    err_handle;                                 \
+} while(0)
+
+#elif HAVE_ROCM_SMI
 #include "rocm_smi.h"
 
-static void *rsmi_dlp = NULL;
+static rsmi_status_t (*smi_initPtr)( unsigned long init_flags ) = NULL;
+static rsmi_status_t (*smi_shut_downPtr)( void ) = NULL;
+static rsmi_status_t (*smi_get_pci_device_idPtr)( unsigned int dev_idx, unsigned long *bdfid ) = NULL;
 
-static rsmi_status_t (*rsmi_initPtr)( unsigned long init_flags ) = NULL;
-static rsmi_status_t (*rsmi_shut_downPtr)( void ) = NULL;
-static rsmi_status_t (*rsmi_dev_pci_id_getPtr)( unsigned int dev_idx, unsigned long *bdfid ) = NULL;
-
-#define ROCM_SMI_CALL(call, err_handle) do {    \
+#define SMI_CALL(call, err_handle) do {         \
     rsmi_status_t _status = (call);             \
     if (_status == RSMI_STATUS_SUCCESS)         \
         break;                                  \
     err_handle;                                 \
 } while(0)
 
-static void fill_dev_affinity_info( _sysdetect_gpu_info_u *dev_info, int dev_count );
-static int rsmi_is_enabled( void );
-static int load_rsmi_sym( char *status );
-static int unload_rsmi_sym( void );
-#endif /* HAVE_ROCM_SMI */
+#endif /* HAVE_AMD_SMI or HAVE_ROCM_SMI */
 
 #ifdef HAVE_ROCM
 hsa_status_t
@@ -292,78 +303,175 @@ unload_hsa_sym( void )
 }
 #endif /* HAVE_ROCM */
 
-#ifdef HAVE_ROCM_SMI
+#ifdef HAVE_AMD_SMI
 void
-fill_dev_affinity_info( _sysdetect_gpu_info_u *info, int dev_count )
+fill_dev_affinity_info(_sysdetect_gpu_info_u *info)
+{
+    uint64_t bdfid = 0;
+    // Obtain the number of sockets containing AMD GPUs. As a note,
+    // it is strictly AMD gpus as amdsmi_init is called with the flag
+    // AMDSMI_INIT_AMD_GPUS.
+    uint32_t socket_count = 0;
+    SMI_CALL( amdsmi_get_socket_handlesPtr(&socket_count, NULL), return );
+
+    // Allocate memory for the number of sockets containing AMD GPUs.
+    amdsmi_socket_handle *socket_handles = (amdsmi_socket_handle *) malloc(socket_count * sizeof(amdsmi_socket_handle));
+    if (socket_handles == NULL) {
+        SUBDBG("Failed to allocate memory for socket_handles.\n");
+        return;
+    }
+
+    // Write the amdsmi_socket_handle values into block of memory.
+    SMI_CALL( amdsmi_get_socket_handlesPtr(&socket_count, socket_handles), return );
+
+    int socket;
+    for (socket = 0; socket < socket_count; socket++) {
+        // Obtain the number of processors available to read for the socket.
+        uint32_t processor_count = 0;
+        SMI_CALL( amdsmi_get_processor_handlesPtr(socket_handles[socket], &processor_count, NULL), return );
+
+        // Allocate memory for the number of processors available to read.
+        amdsmi_processor_handle *processor_handles = (amdsmi_processor_handle *) malloc(processor_count * sizeof(amdsmi_processor_handle));
+        if (processor_handles == NULL) {
+            SUBDBG("Failed to allocate memory for processor_handles.\n");
+            return;
+        }
+
+        // Obtain the processor list for the socket.
+        SMI_CALL( amdsmi_get_processor_handlesPtr(socket_handles[socket], &processor_count, processor_handles), return );
+
+        int processor;
+        for (processor = 0; processor < processor_count; processor++) {
+            // Obtain the unique PCI device identifier associated for a device.
+            SMI_CALL( smi_get_pci_device_idPtr(processor_handles[processor], &bdfid), return );
+
+            int idx = (socket * processor_count) + processor;
+            _sysdetect_gpu_info_u *dev_info = &info[idx];
+            dev_info->amd.uid = bdfid;
+        }
+        free(processor_handles);
+    }
+    free(socket_handles);
+}
+#elif HAVE_ROCM_SMI
+void
+fill_dev_affinity_info( _sysdetect_gpu_info_u *info, int dev_count)
 {
     int dev;
     for (dev = 0; dev < dev_count; ++dev) {
-        unsigned long uid;
-        ROCM_SMI_CALL((*rsmi_dev_pci_id_getPtr)(dev, &uid), return);
-
+        SMI_CALL((*smi_get_pci_device_idPtr)(dev, &bdfid), return);
         _sysdetect_gpu_info_u *dev_info = &info[dev];
-        dev_info->amd.uid = uid;
+        dev_info->amd.uid = bdfid;
+        printf("uid: %d\n", dev_info->amd.uid);
     }
+
+    return;
+}
+#endif
+
+#if defined(HAVE_AMD_SMI) || defined(HAVE_ROCM_SMI)
+int
+smi_is_enabled( void )
+{
+    return (smi_initPtr                                != NULL
+            && smi_shut_downPtr                        != NULL
+            && smi_get_pci_device_idPtr                != NULL
+#ifdef HAVE_AMD_SMI
+            && amdsmi_get_socket_handlesPtr            != NULL
+            && amdsmi_get_processor_handlesPtr         != NULL
+#endif
+           );
 }
 
 int
-rsmi_is_enabled( void )
+load_smi_sym( char *status )
 {
-    return (rsmi_initPtr           != NULL &&
-            rsmi_shut_downPtr      != NULL &&
-            rsmi_dev_pci_id_getPtr != NULL);
-}
+#ifdef HAVE_AMD_SMI
+    char smi_lib[PAPI_MIN_STR_LEN] = "libamd_smi.so";
+    char *smi_root = getenv("PAPI_AMDSMI_ROOT");
 
-int
-load_rsmi_sym( char *status )
-{
-    char pathname[PATH_MAX] = "librocm_smi64.so";
-    char *rsmi_root = getenv("PAPI_ROCM_ROOT");
-    if (rsmi_root != NULL) {
-        sprintf(pathname, "%s/lib/librocm_smi64.so", rsmi_root);
+    const char *vendor_init_symbol = "amdsmi_init";
+    const char *vendor_shut_down_symbol = "amdsmi_shut_down";
+    const char *vendor_pci_symbol = "amdsmi_get_gpu_bdf_id";
+    uint64_t init_flags = AMDSMI_INIT_AMD_GPUS;
+#elif HAVE_ROCM_SMI
+    char smi_lib[PAPI_MIN_STR_LEN] = "librocm_smi64.so";
+    char *smi_root = getenv("PAPI_ROCMSMI_ROOT");
+
+    const char *vendor_init_symbol = "rsmi_init";
+    const char *vendor_shut_down_symbol = "rsmi_shut_down";
+    const char *vendor_pci_symbol = "rsmi_dev_pci_id_get";
+    uint64_t init_flags = 0;
+#endif
+
+    int str_len = 0;
+    char pathname[PATH_MAX] = "";
+    // The user has set PAPI_AMDSMI_ROOT or PAPI_ROCMSMI_ROOT.
+    if (smi_root != NULL) {
+        str_len = snprintf(pathname, PATH_MAX,  "%s/lib/%s", smi_root, smi_lib);
+        if (str_len < 0 || str_len >= PATH_MAX) {
+            SUBDBG("Failed to write root (%s) and lib (%s) into path.\n", smi_root, smi_lib);
+            return PAPI_EBUF;
+        }
+    }
+    // The user has not set PAPI_AMDSMI_ROOT or PAPI_ROCSMI_ROOT. Fallback.
+    else {
+        str_len = snprintf(pathname, PATH_MAX, "%s", smi_lib);
+        if (str_len < 0 || str_len >= PATH_MAX) {
+            SUBDBG("Failed to write lib (%s) into path.\n", smi_lib);
+            return PAPI_EBUF;
+        }
     }
 
-    rsmi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
-    if (rsmi_dlp == NULL) {
-        int count = snprintf(status, PAPI_MAX_STR_LEN, "%s", dlerror());
-        if (count >= PAPI_MAX_STR_LEN) {
+    smi_dlp = dlopen(pathname, RTLD_NOW | RTLD_GLOBAL);
+    if (smi_dlp == NULL) {
+        str_len = snprintf(status, PAPI_MAX_STR_LEN, "%s", dlerror());
+        if (str_len < 0 || str_len >= PAPI_MAX_STR_LEN) {
             SUBDBG("Status string truncated.");
         }
-        return -1;
+        return PAPI_ESYS;
     }
 
-    rsmi_initPtr           = dlsym(rsmi_dlp, "rsmi_init");
-    rsmi_shut_downPtr      = dlsym(rsmi_dlp, "rsmi_shut_down");
-    rsmi_dev_pci_id_getPtr = dlsym(rsmi_dlp, "rsmi_dev_pci_id_get");
+    smi_initPtr                             = dlsym(smi_dlp, vendor_init_symbol);
+    smi_shut_downPtr                        = dlsym(smi_dlp, vendor_shut_down_symbol);
+    smi_get_pci_device_idPtr                = dlsym(smi_dlp, vendor_pci_symbol);
+#ifdef HAVE_AMD_SMI
+    amdsmi_get_socket_handlesPtr            = dlsym(smi_dlp, "amdsmi_get_socket_handles");
+    amdsmi_get_processor_handlesPtr         = dlsym(smi_dlp, "amdsmi_get_processor_handles");
+#endif
 
-    if (!rsmi_is_enabled() || (*rsmi_initPtr)(0)) {
-        const char *message = "dlsym() of RSMI symbols failed or rsmi_init() "
+    if (!smi_is_enabled() || (*smi_initPtr)(init_flags)) {
+        const char *message = "dlsym() of amdsmi symbols failed or amdsmi_init() "
                               "failed";
-        int count = snprintf(status, PAPI_MAX_STR_LEN, "%s", message);
-        if (count >= PAPI_MAX_STR_LEN) {
+        str_len= snprintf(status, PAPI_MAX_STR_LEN, "%s", message);
+        if (str_len < 0 || str_len >= PAPI_MAX_STR_LEN) {
             SUBDBG("Status string truncated.");
         }
-        return -1;
+        return PAPI_ESYS;
     }
 
-    return 0;
+    return PAPI_OK;
 }
 
 int
-unload_rsmi_sym( void )
+unload_smi_sym( void )
 {
-    if (rsmi_dlp != NULL) {
-        (*rsmi_shut_downPtr)();
-        dlclose(rsmi_dlp);
+    if (smi_dlp != NULL) {
+         (*smi_shut_downPtr)();
+         dlclose(smi_dlp);
     }
 
-    rsmi_initPtr           = NULL;
-    rsmi_shut_downPtr      = NULL;
-    rsmi_dev_pci_id_getPtr = NULL;
+    smi_initPtr                             = NULL;
+    smi_shut_downPtr                        = NULL;
+    smi_get_pci_device_idPtr                = NULL;
+#ifdef HAVE_AMD_SMI
+    amdsmi_get_socket_handlesPtr            = NULL;
+    amdsmi_get_processor_handlesPtr         = NULL;
+#endif
 
-    return rsmi_is_enabled();
+    return smi_is_enabled();
 }
-#endif /* HAVE_ROCM_SMI */
+#endif /* HAVE_AMD_SMI or HAVE_ROCM_SMI */
 
 void
 open_amd_gpu_dev_type( _sysdetect_dev_type_info_t *dev_type_info )
@@ -393,19 +501,22 @@ open_amd_gpu_dev_type( _sysdetect_dev_type_info_t *dev_type_info )
     _sysdetect_gpu_info_u *arr = papi_calloc(dev_count, sizeof(*arr));
     fill_dev_info(arr);
 
-#ifdef HAVE_ROCM_SMI
-    if (!load_rsmi_sym(dev_type_info->status)) {
+#if defined(HAVE_AMD_SMI) || defined(HAVE_ROCM_SMI)
+    if (!load_smi_sym(dev_type_info->status)) {
+        #ifdef HAVE_AMD_SMI
+        fill_dev_affinity_info(arr);
+        #elif HAVE_ROCM_SMI
         fill_dev_affinity_info(arr, dev_count);
-        unload_rsmi_sym();
+        #endif
+        unload_smi_sym();
     }
 #else
-    const char *message = "RSMI not configured, no device affinity available";
+    const char *message = "Neither amd_smi nor rocm_smi are configured; therefore, no device affinity available.";
     int count = snprintf(dev_type_info->status, PAPI_MAX_STR_LEN, "%s", message);
     if (count >= PAPI_MAX_STR_LEN) {
         SUBDBG("Error message truncated.");
     }
-#endif /* HAVE_ROCM_SMI */
-
+#endif /* HAVE_AMD_SMI or HAVE_ROCM_SMI */
     unload_hsa_sym();
     dev_type_info->dev_info_arr = (_sysdetect_dev_info_u *)arr;
 #else

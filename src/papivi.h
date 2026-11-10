@@ -536,7 +536,7 @@ static int PAPI_get_multiplex(int EventSet)
 #define PAPIvi_destroy_eventset(EventSet) \
           PAPI_destroy_eventset(EventSet)
 #define PAPIvi_event_code_to_name(EventCode, out) \
-          PAPI_event_code_to_name(EventCode, out)
+          PAPI_event_code_to_name(EventCode, out, PAPI_2MAX_STR_LEN)
 #define PAPIvi_event_name_to_code(in, out) \
           PAPI_event_name_to_code(in, out)
 #define PAPIvi_get_dmem_info(option) \
@@ -716,7 +716,7 @@ int PAPI_save(void);
 #define PAPIvi_enum_event(EventCode, modifier) \
           PAPI_enum_event(EventCode, modifier)
 #define PAPIvi_event_code_to_name(EventCode, out) \
-          PAPI_event_code_to_name(EventCode, out)
+          PAPI_event_code_to_name(EventCode, out, PAPI_2MAX_STR_LEN)
 #define PAPIvi_event_name_to_code(in, out) \
           PAPI_event_name_to_code(in, out)
 #define PAPIvi_get_dmem_info(option) \

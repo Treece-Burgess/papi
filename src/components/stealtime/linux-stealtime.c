@@ -498,7 +498,7 @@ _stealtime_set_domain( hwd_control_state_t * cntrl, int domain )
  *
  */
 static int
-_stealtime_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_stealtime_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 
   int event=EventCode;

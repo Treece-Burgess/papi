@@ -70,7 +70,7 @@ main( int argc, char **argv )
 	long long hard_min, hard_max, soft_min, soft_max;
 	int retval;
 	int PAPI_event = 0, mythreshold;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	PAPI_option_t opt;
 	PAPI_event_info_t info;
 	PAPI_option_t itimer;
@@ -264,7 +264,7 @@ main( int argc, char **argv )
 
 	if ( !TESTS_QUIET ) {
 		if ( ( retval =
-			   PAPI_event_code_to_name( PAPI_event, event_name ) ) != PAPI_OK )
+			   PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) ) ) != PAPI_OK )
 			test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 
 		printf

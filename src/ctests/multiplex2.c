@@ -26,7 +26,7 @@ case1( void )
 	int max_mux, nev, *events;
 	long long *values;
 	PAPI_event_info_t pset;
-	char evname[PAPI_MAX_STR_LEN];
+	char evname[PAPI_2MAX_STR_LEN];
 
 	/* Initialize PAPI */
 
@@ -141,7 +141,7 @@ case1( void )
 
 	if (!TESTS_QUIET) printf( "\nEvent Counts:\n" );
 	for ( i = 0, allvalid = 0; i < j; i++ ) {
-		PAPI_event_code_to_name( events[i], evname );
+		PAPI_event_code_to_name( events[i], evname, sizeof(evname) );
 		if (!TESTS_QUIET) printf( TAB1, evname, values[i] );
 		if ( values[i] == 0 )
 			allvalid++;

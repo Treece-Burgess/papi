@@ -15,7 +15,7 @@ int vendorp1_ctx_reset(vendorp_ctx_t ctx);
 int vendorp1_ctx_close(vendorp_ctx_t ctx);
 
 int vendorp1_evt_enum(unsigned int *event_code, int modifier);
-int vendorp1_evt_code_to_name(unsigned int event_code, char *name, int len);
+int vendorp1_evt_code_to_name(unsigned int event_code, char *name, size_t len);
 int vendorp1_evt_code_to_descr(unsigned int event_code, char *descr, int len);
 int vendorp1_evt_code_to_info(unsigned int event_code, PAPI_event_info_t *info);
 int vendorp1_evt_name_to_code(const char *name, unsigned int *event_code);

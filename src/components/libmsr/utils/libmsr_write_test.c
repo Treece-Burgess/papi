@@ -83,7 +83,7 @@ int main (int argc, char **argv)
     code = PAPI_NATIVE_MASK;
     enum_retval = PAPI_enum_cmp_event( &code, PAPI_ENUM_FIRST, cid );
     while ( enum_retval == PAPI_OK ) {
-        retval = PAPI_event_code_to_name( code, event_name );
+        retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
         if ( retval != PAPI_OK ) {
             printf("Error translating %#x\n",code);
             exit(1);

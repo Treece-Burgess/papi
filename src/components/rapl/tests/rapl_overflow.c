@@ -70,7 +70,7 @@ main( int argc, char **argv )
 	long long values0[2],values1[2],values2[2];
 	int num_flops = 30000000, retval;
 	int mythreshold;
-	char event_name1[PAPI_MAX_STR_LEN];
+	char event_name1[PAPI_2MAX_STR_LEN];
         int PAPI_event;
 	int cid,numcmp,rapl_cid;
 	const PAPI_component_info_t *cmpinfo = NULL;
@@ -212,7 +212,7 @@ main( int argc, char **argv )
 	   test_fail(__FILE__, __LINE__,"PAPI_overflow",retval);
 	}
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name1 );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name1, sizeof(event_name1) );
 	if (retval != PAPI_OK) {
 	   test_fail(__FILE__, __LINE__,"PAPI_event_code_to_name\n", retval);
 	}
@@ -221,7 +221,7 @@ main( int argc, char **argv )
 	   printf("%s: %lld(Calibration) %lld(OverflowRun)\n",event_name1,values0[0],values1[0]);
 	}
 
-	retval = PAPI_event_code_to_name( PAPI_TOT_INS, event_name1 );
+	retval = PAPI_event_code_to_name( PAPI_TOT_INS, event_name1, sizeof(event_name1) );
 	if (retval != PAPI_OK) {
 	  test_fail(__FILE__, __LINE__,"PAPI_event_code_to_name\n",retval);
 	}

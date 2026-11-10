@@ -19,7 +19,7 @@ int vendord_ctx_close(vendord_ctx_t ctx);
 int vendord_err_get_last(const char **error);
 
 int vendord_evt_enum(unsigned int *event_code, int modifier);
-int vendord_evt_code_to_name(unsigned int event_code, char *name, int len);
+int vendord_evt_code_to_name(unsigned int event_code, char *name, size_t len);
 int vendord_evt_code_to_descr(unsigned int event_code, char *descr, int len);
 int vendord_evt_code_to_info(unsigned int event_code, PAPI_event_info_t *info);
 int vendord_evt_name_to_code(const char *name, unsigned int *event_code);

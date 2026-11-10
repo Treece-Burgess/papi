@@ -102,7 +102,7 @@
 
       call stringify_granularity(granularity, grnstr)
       if (tests_quiet .EQ. 0) then
-        call PAPIf_event_code_to_name (event, name, retval)
+        call PAPIf_event_code_to_name (event, name, len(name), retval)
         write (*,800) "Default granularity is:", granularity, grnstr
  800    format(a25, i3, " ", a70)
         write (*,810) "Using", NUM_FLOPS,

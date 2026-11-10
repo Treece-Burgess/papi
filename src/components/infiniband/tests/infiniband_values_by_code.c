@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 
         values = (long long*) malloc(sizeof(long long) * cmpinfo->num_native_events);
         codes = (int*) malloc(sizeof(int) * cmpinfo->num_native_events);
-        names = (char*) malloc(PAPI_MAX_STR_LEN * cmpinfo->num_native_events);
+        names = (char*) malloc(PAPI_2MAX_STR_LEN * cmpinfo->num_native_events);
 
         EventSet = PAPI_NULL;
 
@@ -83,7 +83,7 @@ int main (int argc, char **argv)
         i = 0;
         while ( r == PAPI_OK ) {
 
-            retval = PAPI_event_code_to_name( code, &names[i*PAPI_MAX_STR_LEN] );
+            retval = PAPI_event_code_to_name( code, &names[i*PAPI_2MAX_STR_LEN], PAPI_2MAX_STR_LEN );
             if ( retval != PAPI_OK ) {
                 test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
             }

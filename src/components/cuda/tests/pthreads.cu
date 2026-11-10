@@ -226,7 +226,8 @@ int main(int argc, char **argv)
         global_cuda_native_event_names[global_total_event_count] = (char *) malloc(PAPI_2MAX_STR_LEN * sizeof(char));
         check_memory_allocation_call( global_cuda_native_event_names[global_total_event_count] );
 
-        check_papi_api_call( PAPI_event_code_to_name(cuda_eventcode, global_cuda_native_event_names[global_total_event_count++]) );
+        check_papi_api_call( PAPI_event_code_to_name(cuda_eventcode, global_cuda_native_event_names[global_total_event_count++],
+                                                     PAPI_2MAX_STR_LEN) );
     }
 
     const PAPI_component_info_t *cmpInfo = PAPI_get_component_info(cuda_cmp_idx);

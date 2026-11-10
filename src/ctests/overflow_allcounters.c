@@ -55,7 +55,7 @@ main( int argc, char **argv )
 	char **names;
 	const PAPI_hw_info_t *hw_info = NULL;
 	int num_events, *ovt;
-	char name[PAPI_MAX_STR_LEN];
+	char name[PAPI_2MAX_STR_LEN];
 	int using_perfmon = 0;
 	int using_aix = 0;
 	int cid;
@@ -98,7 +98,7 @@ main( int argc, char **argv )
 				    sizeof ( char * ) );
 
 	for ( i = 0; i < num_events; i++ ) {
-	   if ( PAPI_event_code_to_name( events[i], name ) != PAPI_OK ) {
+	   if ( PAPI_event_code_to_name( events[i], name, sizeof(name) ) != PAPI_OK ) {
 	      test_fail( __FILE__, __LINE__,"PAPI_event_code_to_name", retval);
 	   }
 	   else {

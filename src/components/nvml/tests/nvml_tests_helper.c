@@ -37,11 +37,12 @@ void enumerate_and_store_nvml_native_events(char ***nvml_native_event_names_arg,
     char **enumerated_nvml_native_event_name = (char **) malloc(num_spaces_to_allocate * sizeof(char *));
     check_memory_allocation_call(enumerated_nvml_native_event_name);
 
-    enumerated_nvml_native_event_name[(*total_event_count_arg)] = (char *) malloc(PAPI_MAX_STR_LEN * sizeof(char));
+    enumerated_nvml_native_event_name[(*total_event_count_arg)] = (char *) malloc(PAPI_2MAX_STR_LEN * sizeof(char));
     check_memory_allocation_call(enumerated_nvml_native_event_name[(*total_event_count_arg)]);
 
     // Convert the first nvml native event code to a name
-    papi_errno = PAPI_event_code_to_name(nvml_eventcode, enumerated_nvml_native_event_name[(*total_event_count_arg)]);
+    papi_errno = PAPI_event_code_to_name(nvml_eventcode, enumerated_nvml_native_event_name[(*total_event_count_arg)],
+                                         PAPI_2MAX_STR_LEN);
     if (papi_errno != PAPI_OK) {
         test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name()", papi_errno);
     }

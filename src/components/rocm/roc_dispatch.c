@@ -58,7 +58,7 @@ rocd_evt_name_to_code(const char *name, uint64_t *event_code)
 }
 
 int
-rocd_evt_code_to_name(uint64_t event_code, char *name, int len)
+rocd_evt_code_to_name(uint64_t event_code, char *name, size_t len)
 {
     return rocp_evt_code_to_name(event_code, name, len);
 }

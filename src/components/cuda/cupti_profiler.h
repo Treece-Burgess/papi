@@ -25,7 +25,7 @@ int cuptip_shutdown(void);
 int cuptip_evt_enum(uint32_t *event_code, int modifier);
 int cuptip_evt_code_to_descr(uint32_t event_code, char *descr, int len);
 int cuptip_evt_name_to_code(const char *name, uint32_t *event_code);
-int cuptip_evt_code_to_name(uint32_t event_code, char *name, int len);
+int cuptip_evt_code_to_name(uint32_t event_code, char *name, size_t len);
 int cuptip_evt_code_to_info(uint32_t event_code, PAPI_event_info_t *info);
 
 /* profiling context handling interfaces */

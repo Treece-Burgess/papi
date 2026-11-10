@@ -449,7 +449,7 @@ rocs_evt_name_to_code(const char *name, unsigned int *event_code)
 }
 
 int
-rocs_evt_code_to_name(unsigned int event_code, char *name, int len)
+rocs_evt_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     if (event_code >= (unsigned int) ntv_table_p->count) {
         return PAPI_EINVAL;

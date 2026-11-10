@@ -36,7 +36,7 @@ int main (int argc, char **argv)
 	const PAPI_component_info_t *cmpinfo = NULL;
 	int numcmp,cid,example_cid=-1;
 	int code,maximum_code=0;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	PAPI_event_info_t event_info;
 	int quiet=0;
 
@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 	retval = PAPI_enum_cmp_event( &code, PAPI_ENUM_FIRST, example_cid );
 
 	while ( retval == PAPI_OK ) {
-	  if (PAPI_event_code_to_name( code, event_name )!=PAPI_OK) {
+	  if (PAPI_event_code_to_name( code, event_name, sizeof(event_name) )!=PAPI_OK) {
 	     printf("Error translating %#x\n",code);
 	     test_fail( __FILE__, __LINE__,
 		       "PAPI_event_code_to_name", retval );
@@ -123,7 +123,7 @@ int main (int argc, char **argv)
 	/* Try accessing an invalid event */
 	/**********************************/
 
-	retval=PAPI_event_code_to_name( maximum_code+10, event_name );
+	retval=PAPI_event_code_to_name( maximum_code+10, event_name, sizeof(event_name) );
 	if (retval!=PAPI_ENOEVNT) {
 	   test_fail( __FILE__, __LINE__,
 		    "Failed to return PAPI_ENOEVNT on invalid event", retval );

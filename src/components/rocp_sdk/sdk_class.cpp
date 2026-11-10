@@ -1320,7 +1320,7 @@ rocprofiler_sdk_evt_enum(unsigned int *event_code, int modifier)
 }
 
 extern "C" int
-rocprofiler_sdk_evt_code_to_name(unsigned int event_code, char *name, int len)
+rocprofiler_sdk_evt_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     int papi_errno = PAPI_OK;
     const char *tmp_name;

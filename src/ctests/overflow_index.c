@@ -71,7 +71,7 @@ main( int argc, char **argv )
 	long long ( values[3] )[2];
 	int retval;
 	int PAPI_event, k, i;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	int index_array[2], number;
 	int num_events1, mask1;
 	int quiet;
@@ -121,7 +121,7 @@ main( int argc, char **argv )
 	if ( retval != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_stop", retval );
 
-	 retval = PAPI_event_code_to_name( PAPI_event, event_name );
+	 retval = PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) );
 	if (retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}

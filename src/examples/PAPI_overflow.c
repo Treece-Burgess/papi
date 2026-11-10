@@ -33,7 +33,7 @@ int main ()
    int retval, i;
    double tmp = 0;
    int PAPI_event;		/* a place holder for an event preset */
-   char event_name[PAPI_MAX_STR_LEN];
+   char event_name[PAPI_2MAX_STR_LEN];
 
 
    /****************************************************************************
@@ -71,7 +71,7 @@ int main ()
 
    /* PAPI_event_code_to_name is used to convert a PAPI preset from 
      its integer value to its string name. */
-   if ((retval = PAPI_event_code_to_name (PAPI_event, event_name)) != PAPI_OK)
+   if ((retval = PAPI_event_code_to_name (PAPI_event, event_name, sizeof(event_name))) != PAPI_OK)
       ERROR_RETURN(retval);
 
    /* add event to the event set */

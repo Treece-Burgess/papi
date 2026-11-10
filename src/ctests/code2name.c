@@ -20,7 +20,7 @@ main( int argc, char **argv )
 {
 	int retval;
 	int code = PAPI_TOT_CYC, last;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	const PAPI_component_info_t *cmp_info;
 	int quiet;
 
@@ -38,7 +38,7 @@ main( int argc, char **argv )
 		printf( "Looking for PAPI_TOT_CYC...\n" );
 	}
 
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}
@@ -52,7 +52,7 @@ main( int argc, char **argv )
 			"(PAPI_FP_OPS): %#x...\n",code );
 	}
 
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 
@@ -65,7 +65,7 @@ main( int argc, char **argv )
 			" %#x...\n", code );
 	}
 
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK ) {
 		test_continue( "PAPI_event_code_to_name", retval );
 	}
@@ -80,7 +80,7 @@ main( int argc, char **argv )
 			" %#x...\n", code );
 	}
 
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 
 	if ( retval != PAPI_OK ) {
 		test_continue( "PAPI_event_code_to_name", retval );
@@ -99,7 +99,7 @@ main( int argc, char **argv )
 		printf( "Looking for first native event: %#x...\n", code );
 	}
 
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK ) {
 		if (!quiet) printf("Could not find first native event\n");
 		test_skip( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
@@ -127,7 +127,7 @@ main( int argc, char **argv )
 
 	code = last;
 	if (!quiet) printf( "Looking for last native event: %#x...\n", code );
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}
@@ -139,7 +139,7 @@ main( int argc, char **argv )
 	/* Turn on all bits *except* PRESET bit and COMPONENT bits */
 	code = PAPI_PRESET_AND_MASK;
 	if (!quiet) printf( "Looking for highest definable native event: %#x...\n", code );
-	retval = PAPI_event_code_to_name( code, event_name );
+	retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK ) {
 		test_continue( "PAPI_event_code_to_name", retval );
 	}

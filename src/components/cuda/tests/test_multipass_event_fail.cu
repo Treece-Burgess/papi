@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         modifier = PAPI_ENUM_EVENTS;
         do {
            char cuda_eventname[PAPI_2MAX_STR_LEN];
-           check_papi_api_call( PAPI_event_code_to_name(cuda_eventcode, cuda_eventname) );
+           check_papi_api_call( PAPI_event_code_to_name(cuda_eventcode, cuda_eventname, sizeof(cuda_eventname) ) );
 
            papi_errno = PAPI_add_named_event(EventSet, cuda_eventname);
            if (papi_errno != PAPI_OK && papi_errno != PAPI_EMULPASS) {

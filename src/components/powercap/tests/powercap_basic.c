@@ -78,7 +78,7 @@ int main ( int argc, char **argv )
     long long *values;
     int num_events=0;
     int code;
-    char event_names[MAX_powercap_EVENTS][PAPI_MAX_STR_LEN];
+    char event_names[MAX_powercap_EVENTS][PAPI_2MAX_STR_LEN];
     char event_descrs[MAX_powercap_EVENTS][PAPI_HUGE_STR_LEN];
     char units[MAX_powercap_EVENTS][PAPI_MIN_STR_LEN];
     int data_type[MAX_powercap_EVENTS];
@@ -147,7 +147,7 @@ int main ( int argc, char **argv )
     code = PAPI_NATIVE_MASK;
     r = PAPI_enum_cmp_event( &code, PAPI_ENUM_FIRST, powercap_cid );
     while ( r == PAPI_OK ) {
-        retval = PAPI_event_code_to_name( code, event_names[num_events] );
+        retval = PAPI_event_code_to_name( code, event_names[num_events], sizeof(event_names[num_events]) );
         if ( retval != PAPI_OK )
             test_fail( __FILE__, __LINE__,"Error from PAPI_event_code_to_name", retval );
 
@@ -158,7 +158,7 @@ int main ( int argc, char **argv )
         strncpy( event_descrs[num_events],evinfo.long_descr,PAPI_HUGE_STR_LEN );
         strncpy( units[num_events],evinfo.units,PAPI_MIN_STR_LEN );
         // buffer must be null terminated to safely use strstr operation on it below
-        event_names[num_events][PAPI_MAX_STR_LEN-1] = '\0';
+        event_names[num_events][PAPI_2MAX_STR_LEN-1] = '\0';
         data_type[num_events] = evinfo.data_type;
         retval = PAPI_add_event( EventSet, code );
 

@@ -77,7 +77,7 @@ vendord_evt_enum(unsigned int *event_code, int modifier)
 }
 
 int
-vendord_evt_code_to_name(unsigned int event_code, char *name, int len)
+vendord_evt_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     return vendorp1_evt_code_to_name(event_code, name, len);
 }

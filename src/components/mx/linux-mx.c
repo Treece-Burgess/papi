@@ -477,7 +477,7 @@ _mx_set_domain( hwd_control_state_t * cntrl, int domain )
 
 
 static int
-_mx_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_mx_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 
 	int event=EventCode;

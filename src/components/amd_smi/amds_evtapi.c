@@ -375,8 +375,8 @@ int amds_evt_enum(unsigned int *EventCode, int modifier) {
   }
 }
 
-int amds_evt_code_to_name(unsigned int EventCode, char *name, int len) {
-  if (!name || len <= 0)
+int amds_evt_code_to_name(unsigned int EventCode, char *name, size_t len) {
+  if (!name)
     return PAPI_EINVAL;
 
   amds_event_info_t info;
@@ -386,9 +386,9 @@ int amds_evt_code_to_name(unsigned int EventCode, char *name, int len) {
 
   native_event_t *event = &ntv_table_p->events[info.nameid];
   if (info.flags & AMDS_DEVICE_FLAG)
-    CHECK_SNPRINTF(doNotAllowTruncation, name, (size_t)len, "%s:device=%d", event->name, info.device);
+    CHECK_SNPRINTF(doNotAllowTruncation, name, len, "%s:device=%d", event->name, info.device);
   else
-    CHECK_SNPRINTF(doNotAllowTruncation, name, (size_t)len, "%s", event->name);
+    CHECK_SNPRINTF(doNotAllowTruncation, name, len, "%s", event->name);
   return PAPI_OK;
 }
 

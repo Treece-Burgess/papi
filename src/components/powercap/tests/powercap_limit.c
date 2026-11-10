@@ -24,7 +24,7 @@ int main ( int argc, char **argv )
   long long values[MAX_powercap_EVENTS];
   int num_limits=0;
   int code;
-  char power_limit_eventnames[MAX_powercap_EVENTS][PAPI_MAX_STR_LEN];
+  char power_limit_eventnames[MAX_powercap_EVENTS][PAPI_2MAX_STR_LEN];
   int r,i;
 
   const PAPI_component_info_t *cmpinfo = NULL;
@@ -76,8 +76,8 @@ int main ( int argc, char **argv )
 
   /* Find all package power limit events */
   while (r == PAPI_OK) {
-    char powercap_eventname[PAPI_MAX_STR_LEN] = { 0 };
-    retval = PAPI_event_code_to_name( code, powercap_eventname );
+    char powercap_eventname[PAPI_2MAX_STR_LEN] = { 0 };
+    retval = PAPI_event_code_to_name( code, powercap_eventname, sizeof(powercap_eventname) );
     if ( retval != PAPI_OK ) 
       test_fail( __FILE__, __LINE__,"PAPI_event_code_to_name()", retval );
 

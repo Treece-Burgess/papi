@@ -394,7 +394,7 @@ NWUNIT_ntv_name_to_code( const char *name, unsigned int *event_code )
  *
  */
 int
-NWUNIT_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+NWUNIT_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 #ifdef DEBUG_BGQ
 	//printf( "NWUNIT_ntv_code_to_name\n" );

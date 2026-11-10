@@ -493,13 +493,10 @@ EMON_ntv_enum_events( unsigned int *EventCode, int modifier )
  *
  */
 int
-EMON_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+EMON_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 	EMONDBG( "EMON_ntv_code_to_name\n" );
 	int index;
-	( void ) name;
-	( void ) len;
-	
 	index = ( EventCode );
 
 	if ( index >= EMON_TOTAL_EVENTS || index < 0 ) {

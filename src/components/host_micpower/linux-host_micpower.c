@@ -521,7 +521,7 @@ int _host_micpower_ntv_enum_events( unsigned int *EventCode, int modifier )
 }
 
 int
-_host_micpower_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_host_micpower_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 	unsigned int code = EventCode & PAPI_NATIVE_AND_MASK;
 	if ( code < _host_micpower_vector.cmp_info.num_cntrs ) {

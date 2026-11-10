@@ -362,7 +362,7 @@ _rocm_smi_ntv_enum_events(unsigned int *EventCode, int modifier)
 }
 
 static int
-_rocm_smi_ntv_code_to_name(unsigned int EventCode, char *name, int len)
+_rocm_smi_ntv_code_to_name(unsigned int EventCode, char *name, size_t len)
 {
     int papi_errno =_rocm_smi_check_n_initialize();
     if (papi_errno != PAPI_OK) {

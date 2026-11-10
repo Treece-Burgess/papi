@@ -61,7 +61,7 @@ int main(int argc, char **argv)
             printf("%s %s", "Event code", "Event name\n");
         }
 
-        retval = PAPI_event_code_to_name(EventCode, EventName);
+        retval = PAPI_event_code_to_name(EventCode, EventName, sizeof(EventName));
         if (retval != PAPI_OK) {
             test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name", retval);
         }

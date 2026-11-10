@@ -53,7 +53,7 @@ main( int argc, char **argv )
 	long long min, max;
 	int num_flops = NUM_FLOPS, retval;
 	int PAPI_event = 0, mythreshold;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	const PAPI_hw_info_t *hw_info = NULL;
 	int quiet;
 
@@ -149,7 +149,7 @@ main( int argc, char **argv )
 
 	if ( !quiet ) {
 		if ( ( retval =
-			   PAPI_event_code_to_name( PAPI_event, event_name ) ) != PAPI_OK )
+			   PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) ) ) != PAPI_OK )
 			test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 
 		printf

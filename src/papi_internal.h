@@ -487,7 +487,7 @@ int _papi_hwi_get_native_event_info( unsigned int EventCode,
                                      PAPI_event_info_t * info );
 int _papi_hwi_native_name_to_code( const char *in, int *out );
 int _papi_hwi_native_code_to_name( unsigned int EventCode, char *hwi_name,
-                                   int len );
+                                   size_t len );
 
 
 int _papi_hwi_invalid_cmp( int cidx );

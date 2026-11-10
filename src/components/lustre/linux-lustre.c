@@ -704,7 +704,7 @@ _lustre_set_domain( hwd_control_state_t * cntrl, int domain )
  *
  */
 static int
-_lustre_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_lustre_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
    SUBDBG("ENTER: EventCode: %#x, name: %p, len: %d\n", EventCode, name, len);
   int event=EventCode;

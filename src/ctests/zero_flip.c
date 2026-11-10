@@ -31,7 +31,7 @@ main( int argc, char **argv )
 	int PAPI_event;
 	long long values1[2], values2[2];
 	long long elapsed_us, elapsed_cyc;
-	char event_name[PAPI_MAX_STR_LEN], add_event_str[PAPI_2MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN], add_event_str[PAPI_2MAX_STR_LEN];
 	int quiet;
 
 	/* Set TESTS_QUIET variable */
@@ -47,7 +47,7 @@ main( int argc, char **argv )
 	else
 		PAPI_event = PAPI_TOT_INS;
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	sprintf( add_event_str, "PAPI_add_event[%s]", event_name );
@@ -80,7 +80,7 @@ main( int argc, char **argv )
 		test_fail( __FILE__, __LINE__, "PAPI_list_events", retval );
 
 	for ( i = eventcnt - 1; i >= 0; i-- ) {
-		retval = PAPI_event_code_to_name( events[i], event_name );
+		retval = PAPI_event_code_to_name( events[i], event_name, sizeof(event_name) );
 		if ( retval != PAPI_OK )
 			test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 

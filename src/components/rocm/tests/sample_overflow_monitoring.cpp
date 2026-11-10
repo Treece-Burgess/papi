@@ -115,7 +115,7 @@ void overflow_handler(int event_set, void *address __attribute__((unused)),
                       void *context __attribute__((unused)))
 {
     int papi_errno;
-    char event_name[PAPI_MAX_STR_LEN];
+    char event_name[PAPI_2MAX_STR_LEN];
     int *event_codes, event_index, number=1;
 
     papi_errno = PAPI_get_overflow_event_index(event_set, overflow_vector,
@@ -132,7 +132,7 @@ void overflow_handler(int event_set, void *address __attribute__((unused)),
         test_fail(__FILE__, __LINE__, "PAPI_list_events", papi_errno);
     }
 
-    papi_errno = PAPI_event_code_to_name(event_codes[event_index], event_name);
+    papi_errno = PAPI_event_code_to_name(event_codes[event_index], event_name, sizeof(event_name));
     if (papi_errno != PAPI_OK) {
         test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name", papi_errno);
     }

@@ -580,7 +580,7 @@ _example_ntv_enum_events( unsigned int *EventCode, int modifier )
  * @param len is the size of the name string
  */
 static int
-_example_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_example_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
   int index;
 

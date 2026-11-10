@@ -632,7 +632,7 @@ _net_ntv_name_to_code( const char *name, unsigned int *EventCode )
  *
  */
 static int
-_net_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_net_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
     int index = EventCode;
 

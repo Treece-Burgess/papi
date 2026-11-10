@@ -180,7 +180,7 @@ _papi_hwi_get_ntv_idx (unsigned int papi_evt_code) {
  * traditional PAPI 'cpu' components, opting to not prepend those.
  */
 int
-_papi_hwi_prefix_component_name( char *component_name, char *event_name, char *out, int out_len) 
+_papi_hwi_prefix_component_name( char *component_name, char *event_name, char *out, size_t out_len) 
 {
 	int size1, size2;
 	char temp[out_len];
@@ -2874,7 +2874,7 @@ _papi_hwi_native_name_to_code( const char *in, int *out )
    Returns NULL if name not found */
 int
 _papi_hwi_native_code_to_name( unsigned int EventCode,
-			       char *hwi_name, int len )
+			       char *hwi_name, size_t len )
 {
 	INTDBG("ENTER: EventCode: %#x, hwi_name: %p, len: %d\n", EventCode, hwi_name, len);
   int cidx;

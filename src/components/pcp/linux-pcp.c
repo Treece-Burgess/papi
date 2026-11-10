@@ -1761,7 +1761,7 @@ static int _pcp_ntv_name_to_code(const char *name, unsigned int *event_code)
 // Collect the name of the event from the EventCode, given here as our index
 // into pcp_event_info[]. We must fit it into name[len].
 //----------------------------------------------------------------------------
-static int _pcp_ntv_code_to_name(unsigned int pcpIdx, char *name, int len)
+static int _pcp_ntv_code_to_name(unsigned int pcpIdx, char *name, size_t len)
 {
    mRtnCnt(_pcp_ntv_code_to_name);                                      // count this function.
 
@@ -1772,11 +1772,6 @@ static int _pcp_ntv_code_to_name(unsigned int pcpIdx, char *name, int len)
       return PAPI_EINVAL;                                               // exit with error.
    }
 
-   if (len < 1)  {                                                      // If length is ridiculous,
-      fprintf(stderr, "%s:%i:%s called with out-of-range descr len=%i.\n",
-         __FILE__, __LINE__, FUNC, len);
-      return PAPI_EINVAL;                                               // exit with error.
-   }
 
    strncpy(name, pcp_event_info[pcpIdx].name, len);                     // just copy the name.
    name[len-1]=0;                                                       // force z-termination.

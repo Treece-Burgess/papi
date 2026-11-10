@@ -70,7 +70,7 @@ int main(int argc, char **argv){
 
 
 void overflow_handler(int event_set, void *address, long long overflow_vector, void *context){
-    char event_name[PAPI_MAX_STR_LEN];
+    char event_name[PAPI_2MAX_STR_LEN];
     int ret, *event_codes, event_index, number=1;
 
     (void)address;
@@ -87,7 +87,7 @@ void overflow_handler(int event_set, void *address, long long overflow_vector, v
         test_fail( __FILE__, __LINE__, "PAPI_list_events", ret );
     }
 
-    if( (ret=PAPI_event_code_to_name(event_codes[event_index], event_name)) != PAPI_OK){
+    if( (ret=PAPI_event_code_to_name(event_codes[event_index], event_name, sizeof(event_name))) != PAPI_OK){
         test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", ret );
     }
     free(event_codes);

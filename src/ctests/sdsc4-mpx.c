@@ -29,7 +29,7 @@ int
 main( int argc, char **argv )
 {
 	PAPI_event_info_t info;
-	char name2[PAPI_MAX_STR_LEN];
+	char name2[PAPI_2MAX_STR_LEN];
 	int i, j, retval, idx, repeats;
 	int iters = NUM_FLOPS;
 	double x = 1.1, y, dtmp;
@@ -208,7 +208,7 @@ main( int argc, char **argv )
 
 		for ( j = 0; j < nevents; j++ ) {
 			PAPI_get_event_info( events[j], &info );
-			PAPI_event_code_to_name( truelist[j], name2 );
+			PAPI_event_code_to_name( truelist[j], name2, sizeof(name2) );
 			printf( "%20s = %16lld   %-15s %-15s %s\n",
 				info.short_descr, refvals[j],
 				info.symbol, name2,
@@ -332,7 +332,7 @@ main( int argc, char **argv )
 				idx = eventmap[j];
 				/* printf("Mapping: Counter %d -> slot %d.\n",j,idx); */
 				PAPI_get_event_info( events[idx], &info );
-				PAPI_event_code_to_name( truelist[j], name2 );
+				PAPI_event_code_to_name( truelist[j], name2, sizeof(name2) );
 				printf( "%20s = %16lld   %-15s %-15s %s\n",
 					info.short_descr, values[j],
 					info.symbol, name2,

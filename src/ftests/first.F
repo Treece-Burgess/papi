@@ -10,7 +10,7 @@
       INTEGER EventSet
       integer domain, granularity
       character*(PAPI_MAX_STR_LEN) domainstr, grnstr
-      character*(PAPI_MAX_STR_LEN) name
+      character*(PAPI_2MAX_STR_LEN) name
 
       Integer last_char, n
       External last_char
@@ -133,7 +133,7 @@
 
       call stringify_granularity(granularity, grnstr)
       if (tests_quiet .EQ. 0) then
-        call PAPIf_event_code_to_name (event1, name, retval)
+        call PAPIf_event_code_to_name (event1, name, len(name), retval)
         if ( retval.NE.PAPI_OK) then
             call ftest_fail(__FILE__, __LINE__, 
      * 'PAPIf_event_code_to_name', retval)

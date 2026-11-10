@@ -51,7 +51,7 @@ Thread( int n )
 	long long flops;
 	long long **values;
 	long long elapsed_us, elapsed_cyc;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 
 	/* printf("Thread(n=%d) %#x started\n", n, omp_get_thread_num()); */
 	num_events1 = 2;
@@ -61,7 +61,7 @@ Thread( int n )
 	   platform */
 	EventSet1 = add_two_events( &num_events1, &PAPI_event, &mask1 );
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 

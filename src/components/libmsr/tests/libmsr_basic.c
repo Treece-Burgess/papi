@@ -80,7 +80,7 @@ int main ( int argc, char **argv )
     long long *values;
     int num_events=0;
     int code;
-    char event_names[MAX_LIBMSR_EVENTS][PAPI_MAX_STR_LEN];
+    char event_names[MAX_LIBMSR_EVENTS][PAPI_2MAX_STR_LEN];
     char units[MAX_LIBMSR_EVENTS][PAPI_MIN_STR_LEN];
     int data_type[MAX_LIBMSR_EVENTS];
     int r,i, do_wrap = 0;
@@ -137,7 +137,7 @@ int main ( int argc, char **argv )
     code = PAPI_NATIVE_MASK;
     r = PAPI_enum_cmp_event( &code, PAPI_ENUM_FIRST, libmsr_cid );
     while ( r == PAPI_OK ) {
-        retval = PAPI_event_code_to_name( code, event_names[num_events] );
+        retval = PAPI_event_code_to_name( code, event_names[num_events], sizeof(event_names[num_events]) );
         if ( retval != PAPI_OK ) test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
         retval = PAPI_get_event_info( code,&evinfo );
         if ( retval != PAPI_OK ) test_fail( __FILE__, __LINE__,"Error getting event info\n",retval );

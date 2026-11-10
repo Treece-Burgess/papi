@@ -17,7 +17,7 @@ int cuptie_shutdown(void);
 int cuptie_evt_enum(uint32_t *event_code, int modifier); 
 int cuptie_evt_code_to_descr(uint32_t event_code, char *descr, int len);
 int cuptie_evt_name_to_code(const char *name, uint32_t *event_code);
-int cuptie_evt_code_to_name(uint32_t event_code, char *name, int len);
+int cuptie_evt_code_to_name(uint32_t event_code, char *name, size_t len);
 int cuptie_evt_code_to_info(uint32_t event_code, PAPI_event_info_t *info);
 
 // Interfaces to handling profiling //

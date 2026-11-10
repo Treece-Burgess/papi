@@ -24,7 +24,7 @@ int rocd_shutdown(void);
 int rocd_evt_enum(uint64_t *event_code, int modifier);
 int rocd_evt_code_to_descr(uint64_t event_code, char *descr, int len);
 int rocd_evt_name_to_code(const char *name, uint64_t *event_code);
-int rocd_evt_code_to_name(uint64_t event_code, char *name, int len);
+int rocd_evt_code_to_name(uint64_t event_code, char *name, size_t len);
 int rocd_evt_code_to_info(uint64_t event_code, PAPI_event_info_t *info);
 
 /* error handling interfaces */

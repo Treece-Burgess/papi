@@ -288,7 +288,7 @@ int cuptid_evt_name_to_code(const char *name, uint32_t *event_code)
     return PAPI_ECMP;
 }
 
-int cuptid_evt_code_to_name(uint32_t event_code, char *name, int len)
+int cuptid_evt_code_to_name(uint32_t event_code, char *name, size_t len)
 {
     int cupti_api = cuptic_determine_runtime_api();
     if (cupti_api == API_PERFWORKS) {

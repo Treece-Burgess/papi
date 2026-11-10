@@ -795,31 +795,16 @@ PAPI_FCALL( papif_get_event_info, PAPIF_GET_EVENT_INFO,
  *
  *	@par Fortran Interface:
  *	\#include "fpapi.h" @n
- *	PAPIF_event_code_to_name( C_INT EventCode, C_STRING EventName, C_INT check )
+ *	PAPIF_event_code_to_name( C_INT EventCode, C_STRING EventName, C_SIZE_T, C_INT check )
  *
  * @see PAPI_event_code_to_name
  */
-#if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_event_code_to_name, PAPIF_EVENT_CODE_TO_NAME,
-			( int *EventCode, char *out_str, int *check, int out_len ) )
-#else
-PAPI_FCALL( papif_event_code_to_name, PAPIF_EVENT_CODE_TO_NAME,
-			( int *EventCode, char *out, int *check ) )
-#endif
+                        ( int *EventCode, char *out_str, size_t size, int *check ) )
 {
-#if defined(_FORTRAN_STRLEN_AT_END)
-	char tmp[PAPI_MAX_STR_LEN];
-	int i;
-	*check = PAPI_event_code_to_name( *EventCode, tmp );
-	/* tmp has \0 within PAPI_MAX_STR_LEN chars so strncpy is safe */
-	strncpy( out_str, tmp, ( size_t ) out_len );
-	/* overwrite any NULLs and trailing garbage in out_str */
-	for ( i = ( int ) strlen( tmp ); i < out_len; out_str[i++] = ' ' );
-#else
-	/* The array "out" passed by the user must be sufficiently long */
-	*check = PAPI_event_code_to_name( *EventCode, out );
-#endif
+    *check = PAPI_event_code_to_name(*EventCode, out_str, size);
 }
+
 
 /** @class PAPIF_event_name_to_code
  *	@ingroup PAPIF

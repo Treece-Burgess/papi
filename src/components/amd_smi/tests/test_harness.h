@@ -265,7 +265,7 @@ static inline int harness_canonicalize_event_name(const char *input,
         return papi_errno;
     }
 
-    papi_errno = PAPI_event_code_to_name(code, output);
+    papi_errno = PAPI_event_code_to_name(code, output, sizeof(output));
     if (papi_errno != PAPI_OK) {
         return papi_errno;
     }

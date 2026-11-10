@@ -134,7 +134,7 @@ static int sampling_ctx_reset(rocp_ctx_t);
 static int intercept_ctx_reset(rocp_ctx_t);
 static int sampling_shutdown(void);
 static int intercept_shutdown(void);
-static int evt_code_to_name(uint64_t event_code, char *name, int len);
+static int evt_code_to_name(uint64_t event_code, char *name, size_t len);
 static int evt_id_create(event_info_t *info, uint64_t *event_id);
 static int evt_id_to_info(uint64_t event_id, event_info_t *info);
 static int evt_name_to_device(const char *name, int *device);
@@ -328,7 +328,7 @@ rocp_evt_name_to_code(const char *name, uint64_t *event_code)
 
 /* rocp_evt_code_to_name - convert native event code to name */
 int
-rocp_evt_code_to_name(uint64_t event_code, char *name, int len)
+rocp_evt_code_to_name(uint64_t event_code, char *name, size_t len)
 {
     return evt_code_to_name(event_code, name, len);
 }
@@ -743,7 +743,7 @@ init_event_table(void)
 }
 
 int
-evt_code_to_name(uint64_t event_code, char *name, int len)
+evt_code_to_name(uint64_t event_code, char *name, size_t len)
 {
     int papi_errno;
 

@@ -66,8 +66,8 @@ void enumerate_and_store_rocp_sdk_native_events(char ***rocp_sdk_native_event_na
     // Enumerate and store rocp_sdk native events on the architecture
     modifier = PAPI_ENUM_EVENTS;
     do {
-        char rocp_sdk_eventname[PAPI_MAX_STR_LEN];
-        papi_errno = PAPI_event_code_to_name(rocp_sdk_eventcode, rocp_sdk_eventname);
+        char rocp_sdk_eventname[PAPI_2MAX_STR_LEN];
+        papi_errno = PAPI_event_code_to_name(rocp_sdk_eventcode, rocp_sdk_eventname, sizeof(rocp_sdk_eventname));
         if (papi_errno != PAPI_OK) {
             test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name", papi_errno);
         }

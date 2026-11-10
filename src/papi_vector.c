@@ -171,7 +171,7 @@ _papi_hwi_innoculate_vector( papi_vector_t * v )
 			( int ( * )( const char *, unsigned int * ) ) vec_int_dummy;
 	if ( !v->ntv_code_to_name )
 		v->ntv_code_to_name =
-			( int ( * )( unsigned int, char *, int ) ) vec_int_dummy;
+			( int ( * )( unsigned int, char *, size_t ) ) vec_int_dummy;
 	if ( !v->ntv_code_to_descr )
 		v->ntv_code_to_descr =
 			( int ( * )( unsigned int, char *, int ) ) vec_int_ok_dummy;

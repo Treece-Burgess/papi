@@ -28,7 +28,7 @@ static int templ_reset(hwd_context_t *ctx, hwd_control_state_t *ctl);
 
 /* Event conversion */
 static int templ_ntv_enum_events(unsigned int *event_code, int modifier);
-static int templ_ntv_code_to_name(unsigned int event_code, char *name, int len);
+static int templ_ntv_code_to_name(unsigned int event_code, char *name, size_t len);
 static int templ_ntv_name_to_code(const char *name, unsigned int *event_code);
 static int templ_ntv_code_to_descr(unsigned int event_code, char *descr, int len);
 static int templ_ntv_code_to_info(unsigned int event_code, PAPI_event_info_t *info);
@@ -365,7 +365,7 @@ templ_ntv_enum_events(unsigned int *event_code, int modifier)
 }
 
 int
-templ_ntv_code_to_name(unsigned int event_code, char *name, int len)
+templ_ntv_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     int papi_errno = check_n_initialize();
     if (papi_errno != PAPI_OK) {

@@ -635,10 +635,10 @@ _pe_libpfm4_ntv_name_to_code( const char *name, unsigned int *event_code,
 
 int
 _pe_libpfm4_ntv_code_to_name(unsigned int EventCode,
-			       char *ntv_name, int len,
+			       char *ntv_name, size_t len,
 			       struct native_event_table_t *event_table)
 {
-	SUBDBG("ENTER: EventCode: %#x, ntv_name: %p, len: %d, event_table: %p\n", EventCode, ntv_name, len, event_table);
+	SUBDBG("ENTER: EventCode: %#x, ntv_name: %p, len: %zu, event_table: %p\n", EventCode, ntv_name, len, event_table);
 
 	int eidx;
 	int papi_event_code;
@@ -682,7 +682,7 @@ _pe_libpfm4_ntv_code_to_name(unsigned int EventCode,
 	}
 
 	// if it will not fit, return error
-	if (strlen (ename) >= (unsigned)len) {
+	if (strlen (ename) >= len) {
 		SUBDBG("EXIT: event name %s will not fit in buffer provided\n", ename);
 		return PAPI_EBUF;
 	}
@@ -691,8 +691,8 @@ _pe_libpfm4_ntv_code_to_name(unsigned int EventCode,
 	// if this event had masks, also add their names
 	char *mname = event_table->native_events[eidx].mask_string;
 	if ((mname != NULL)  &&  (strlen(mname) > 0)) {
-		if ((strlen(ename) + 8 + strlen(mname)) >= (unsigned)len) {
-			SUBDBG("EXIT: Not enough room for event and mask descriptions: need: %u, have: %u", (unsigned)(strlen(ename) + 8 + strlen(mname)), (unsigned)len);
+		if ((strlen(ename) + 8 + strlen(mname)) >= len) {
+			SUBDBG("EXIT: Not enough room for event and mask descriptions: need: %u, have: %zu", (unsigned)(strlen(ename) + 8 + strlen(mname)), len);
 			return PAPI_EBUF;
 		}
 		strcat (ntv_name, ":");

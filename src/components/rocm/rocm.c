@@ -47,7 +47,7 @@ static int rocm_reset(hwd_context_t *ctx, hwd_control_state_t *ctl);
 
 /* event conversion utilities */
 static int rocm_ntv_enum_events(unsigned int *event_code, int modifier);
-static int rocm_ntv_code_to_name(unsigned int event_code, char *name, int len);
+static int rocm_ntv_code_to_name(unsigned int event_code, char *name, size_t len);
 static int rocm_ntv_name_to_code(const char *name, unsigned int *event_code);
 static int rocm_ntv_code_to_descr(unsigned int event_code, char *descr,
                                   int len);
@@ -611,7 +611,7 @@ rocm_ntv_enum_events(unsigned int *event_code, int modifier)
 }
 
 int
-rocm_ntv_code_to_name(unsigned int event_code, char *name, int len)
+rocm_ntv_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     SUBDBG("ENTER: event_code: %u, name: %p, len: %d\n", event_code, name, len);
     int papi_errno = check_n_initialize();

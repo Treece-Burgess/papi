@@ -1289,7 +1289,7 @@ _rapl_ntv_enum_events( unsigned int *EventCode, int modifier )
  *
  */
 static int
-_rapl_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_rapl_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 
      int index = EventCode & PAPI_NATIVE_AND_MASK;

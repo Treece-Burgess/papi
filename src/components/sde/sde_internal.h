@@ -65,7 +65,7 @@ static int _sde_shutdown_thread( hwd_context_t *ctx );
 static int _sde_ctl( hwd_context_t *ctx, int code, _papi_int_option_t *option );
 static int _sde_set_domain( hwd_control_state_t * cntrl, int domain );
 static int _sde_ntv_enum_events( unsigned int *EventCode, int modifier );
-static int _sde_ntv_code_to_name( unsigned int EventCode, char *name, int len );
+static int _sde_ntv_code_to_name( unsigned int EventCode, char *name, size_t len );
 static int _sde_ntv_code_to_descr( unsigned int EventCode, char *descr, int len );
 static int _sde_ntv_name_to_code(const char *name, unsigned int *event_code );
 static void _sde_dispatch_timer( int n, hwd_siginfo_t *info, void *uc);

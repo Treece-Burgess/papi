@@ -33,7 +33,7 @@ void do_no_profile(int quiet);
 
 /* variables global to profiling tests */
 extern long long **values;
-extern char event_name[PAPI_MAX_STR_LEN];
+extern char event_name[PAPI_2MAX_STR_LEN];
 extern int PAPI_event;
 extern int EventSet;
 extern void *profbuf[5];

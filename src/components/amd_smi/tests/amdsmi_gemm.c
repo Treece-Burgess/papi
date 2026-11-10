@@ -151,7 +151,7 @@ static int sample_buffer_push(struct sample_buffer *buffer,
 }
 
 static int write_results_csv(const char *path,
-                             const char names[][PAPI_MAX_STR_LEN],
+                             const char names[][PAPI_2MAX_STR_LEN],
                              int event_count,
                              const struct sample_buffer *samples) {
     if (!path || !names || event_count <= 0 || !samples) {
@@ -498,7 +498,7 @@ static int real_main(const HarnessOpts *opts) {
     const int iterations = g_run_config.iterations;
     const useconds_t pause_us = g_run_config.iteration_delay_us;
 
-    char chosen_names[MAX_EVENT_SLOTS][PAPI_MAX_STR_LEN] = {{0}};
+    char chosen_names[MAX_EVENT_SLOTS][PAPI_2MAX_STR_LEN] = {{0}};
     int added = 0;
 
     if (g_run_config.test_mode) {
@@ -511,7 +511,7 @@ static int real_main(const HarnessOpts *opts) {
 
     if (g_run_config.test_mode) {
         for (int i = 0; i < event_count; ++i) {
-            char formatted[PAPI_MAX_STR_LEN] = {0};
+            char formatted[PAPI_2MAX_STR_LEN] = {0};
             int formatted_len = snprintf(formatted,
                                          sizeof(formatted),
                                          kTestEventTemplates[i],
@@ -521,7 +521,7 @@ static int real_main(const HarnessOpts *opts) {
                 if (sample_buf_initialized) sample_buffer_destroy(&sample_buf);
                 return 1;
             }
-            char canonical[PAPI_MAX_STR_LEN] = {0};
+            char canonical[PAPI_2MAX_STR_LEN] = {0};
             statusFlag = harness_canonicalize_event_name(formatted,
                                                          canonical,
                                                          sizeof(canonical));
@@ -560,8 +560,8 @@ static int real_main(const HarnessOpts *opts) {
         }
 
         do {
-            char base_name[PAPI_MAX_STR_LEN] = {0};
-            if (PAPI_event_code_to_name(code, base_name) != PAPI_OK || base_name[0] == '\0') {
+            char base_name[PAPI_2MAX_STR_LEN] = {0};
+            if (PAPI_event_code_to_name(code, base_name, sizeof(base_name)) != PAPI_OK || base_name[0] == '\0') {
                 continue;
             }
 
@@ -570,8 +570,8 @@ static int real_main(const HarnessOpts *opts) {
                 continue;
             }
 
-            char name[PAPI_MAX_STR_LEN] = {0};
-            if (PAPI_event_code_to_name(qualified_code, name) != PAPI_OK || name[0] == '\0') {
+            char name[PAPI_2MAX_STR_LEN] = {0};
+            if (PAPI_event_code_to_name(qualified_code, name, sizeof(name)) != PAPI_OK || name[0] == '\0') {
                 continue; /* couldn't resolve name; try next */
             }
 

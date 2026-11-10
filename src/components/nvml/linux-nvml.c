@@ -1874,9 +1874,9 @@ _papi_nvml_ntv_enum_events(unsigned int *EventCode, int modifier)
  * @param len is the size of the name string
  */
 int
-_papi_nvml_ntv_code_to_name(unsigned int EventCode, char *name, int len)
+_papi_nvml_ntv_code_to_name(unsigned int EventCode, char *name, size_t len)
 {
-    SUBDBG("Entry: EventCode: %#x, name: %s, len: %d\n", EventCode, name, len);
+    SUBDBG("Entry: EventCode: %#x, name: %s, len: %zu\n", EventCode, name, len);
     int index;
 
     DO_SOME_CHECKING(&_nvml_vector);

@@ -547,7 +547,7 @@ unlock:
  * @param len is the size of the name string
  */
 static int
-_sde_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_sde_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
     int ret_val = PAPI_OK;
     unsigned int code = EventCode & PAPI_NATIVE_AND_MASK;

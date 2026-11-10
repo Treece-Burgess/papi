@@ -89,7 +89,7 @@ int main (int argc, char **argv)
     long long *values;
     int num_events=0;
     int code;
-    char event_names[MAX_RAPL_EVENTS][PAPI_MAX_STR_LEN];
+    char event_names[MAX_RAPL_EVENTS][PAPI_2MAX_STR_LEN];
     char units[MAX_RAPL_EVENTS][PAPI_MIN_STR_LEN];
     int data_type[MAX_RAPL_EVENTS];
     int r,i;
@@ -170,7 +170,7 @@ int main (int argc, char **argv)
 
      while ( r == PAPI_OK ) {
 
-        retval = PAPI_event_code_to_name( code, event_names[num_events] );
+        retval = PAPI_event_code_to_name( code, event_names[num_events], sizeof(event_names[num_events]) );
 	if ( retval != PAPI_OK ) {
 	   printf("Error translating %#x\n",code);
 	   test_fail( __FILE__, __LINE__,

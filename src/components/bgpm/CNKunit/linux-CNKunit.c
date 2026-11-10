@@ -393,7 +393,7 @@ CNKUNIT_ntv_name_to_code( const char *name, unsigned int *event_code )
  *
  */
 int
-CNKUNIT_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+CNKUNIT_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 #ifdef DEBUG_BGQ
 	//printf( "CNKUNIT_ntv_code_to_name\n" );

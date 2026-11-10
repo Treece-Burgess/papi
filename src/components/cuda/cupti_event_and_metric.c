@@ -1857,7 +1857,7 @@ int cuptie_evt_name_to_code(const char *name, uint32_t *event_code)
   * @param len
   *   Maximum length allowed for the name.
 */
-int cuptie_evt_code_to_name(uint32_t event_code, char *name, int len)
+int cuptie_evt_code_to_name(uint32_t event_code, char *name, size_t len)
 {
     event_info_t info;
     int papi_errno = event_and_metric_id_to_info(event_code, &info);

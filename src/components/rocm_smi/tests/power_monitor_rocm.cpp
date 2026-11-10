@@ -304,7 +304,7 @@ int main( int argc, char** argv )
     long long OrigLimitFound[NUM_EVENTS];               // original limit read from device.
     int PowerEventCount = 0, LimitEventCount = 0, minEventCount = 0, maxEventCount = 0;
     const PAPI_component_info_t *cmpinfo;
-    char event_name[PAPI_MAX_STR_LEN];
+    char event_name[PAPI_2MAX_STR_LEN];
     signal(SIGTSTP, cbSignal_SIGTSTP);                  // register the signal handler for CTL_Z.
 
     /* PAPI Initialization */
@@ -387,7 +387,7 @@ int main( int argc, char** argv )
         retval = PAPI_enum_cmp_event( &code, event_modifier, cid );
         event_modifier = PAPI_ENUM_EVENTS;
         if ( retval != PAPI_OK ) test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
-        retval = PAPI_event_code_to_name( code, event_name );
+        retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
         char *ss; 
 
         ss = strstr(event_name, "device=");                             // Look for the device id.

@@ -27,7 +27,7 @@ int main (int argc, char **argv)
     int retval,cid,numcmp;
     int EventSet = PAPI_NULL;
     int code;
-    char event_names[MAX_EVENTS][PAPI_MAX_STR_LEN];
+    char event_names[MAX_EVENTS][PAPI_2MAX_STR_LEN];
     int event_codes[MAX_EVENTS];
     long long event_values[MAX_EVENTS];
     int total_events=0; /* events added so far */
@@ -77,7 +77,7 @@ int main (int argc, char **argv)
 
         while ( r == PAPI_OK ) {
 
-            retval = PAPI_event_code_to_name( code, event_names[total_events] );
+            retval = PAPI_event_code_to_name( code, event_names[total_events], sizeof(event_names[total_events]) );
             if ( retval != PAPI_OK ) {
                 test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
             }

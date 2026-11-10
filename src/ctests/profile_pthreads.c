@@ -25,7 +25,7 @@ Thread( void *arg )
 	long long **values;
 	long long elapsed_us, elapsed_cyc;
 	unsigned short *profbuf;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 
 	retval = PAPI_register_thread(  );
 	if ( retval != PAPI_OK ) {
@@ -46,7 +46,7 @@ Thread( void *arg )
 
 	values = allocate_test_space( num_tests, num_events1 );
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) );
 	if (retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}

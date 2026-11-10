@@ -21,7 +21,7 @@ main( int argc, char **argv )
 	int i;
 	PAPI_event_info_t info;
 	long long values;
-	char event_name[PAPI_MAX_STR_LEN], add_event_str[PAPI_2MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN], add_event_str[PAPI_2MAX_STR_LEN];
 	int quiet=0;
 
 	/* Set TESTS_QUIET variable */
@@ -64,7 +64,7 @@ main( int argc, char **argv )
 	}
 
 	for ( i = 0; i < PAPI_events_len; i++ ) {
-		PAPI_event_code_to_name( ( int ) PAPI_events[i], event_name );
+		PAPI_event_code_to_name( ( int ) PAPI_events[i], event_name, sizeof(event_name) );
 		if ( !quiet ) {
 			printf( "Adding %s\n", event_name );
 		}

@@ -1452,7 +1452,7 @@ PAPI_get_event_info( int EventCode, PAPI_event_info_t *info )
  *
  *	@par C Interface:
  *	\#include <papi.h> @n
- *	int PAPI_event_code_to_name( int  EventCode, char * EventName );
+ *	int PAPI_event_code_to_name( int  EventCode, char * EventName, size_t size );
  *
  *	PAPI_event_code_to_name is used to translate a 32-bit integer PAPI event 
  *	code into an ASCII PAPI event name. 
@@ -1463,6 +1463,8 @@ PAPI_get_event_info( int EventCode, PAPI_event_info_t *info )
  *		The numeric code for the event. 
  *	@param *EventName
  *		A string containing the event name as listed in PAPI_presets or discussed in PAPI_native.
+ *	@param size
+ *		The size of the EventName buffer. 
  *
  *	@retval PAPI_EINVAL 
  *		One or more of the arguments is invalid.
@@ -1475,7 +1477,7 @@ PAPI_get_event_info( int EventCode, PAPI_event_info_t *info )
  *	@code
  *	int EventCode, EventSet = PAPI_NULL;
  *  int Event, number;
- *	char EventCodeStr[PAPI_MAX_STR_LEN];
+ *	char EventCodeStr[PAPI_2MAX_STR_LEN];
  *	// Create the EventSet
  *	if ( PAPI_create_eventset( &EventSet ) != PAPI_OK )
  *	handle_error( 1 );
@@ -1486,7 +1488,7 @@ PAPI_get_event_info( int EventCode, PAPI_event_info_t *info )
  *	if ( PAPI_list_events( EventSet, &Event, &number ) != PAPI_OK )
  *	handle_error(1);
  *	// Convert integer code to name string
- *	if ( PAPI_event_code_to_name( Event, EventCodeStr ) != PAPI_OK )
+ *	if ( PAPI_event_code_to_name( Event, EventCodeStr, sizeof(EventCodeStr) ) != PAPI_OK )
  *	handle_error( 1 );
  *	printf( "Event Name: %s\n", EventCodeStr );
  *	@endcode
@@ -1500,13 +1502,14 @@ PAPI_get_event_info( int EventCode, PAPI_event_info_t *info )
  *	@see PAPI_native
  */
 int
-PAPI_event_code_to_name( int EventCode, char *out )
+//PAPI_event_code_to_name( int EventCode, char *out )
+PAPI_event_code_to_name( int EventCode, char *out, size_t size )
 {
 	APIDBG( "Entry: EventCode: %#x, out: %p\n", EventCode, out);
 	if ( out == NULL )
 		papi_return( PAPI_EINVAL );
 
-	int compIdx;
+	int compIdx, str_len;
 	if ( IS_PRESET(EventCode) ) {
 		EventCode &= PAPI_PRESET_AND_MASK;
 		if ( EventCode < 0 || EventCode >= num_all_presets )
@@ -1526,8 +1529,12 @@ PAPI_event_code_to_name( int EventCode, char *out )
 		if (_papi_hwi_comp_presets[compIdx][preset_index].symbol == NULL )
 			papi_return( PAPI_ENOTPRESET );
 
-		strncpy( out, _papi_hwi_comp_presets[compIdx][preset_index].symbol, PAPI_MAX_STR_LEN-1 );
-		out[PAPI_MAX_STR_LEN-1] = '\0';
+                str_len = snprintf(out, size, "%s",  _papi_hwi_comp_presets[compIdx][preset_index].symbol);
+                if (str_len < 0 || (size_t) str_len >= size) {
+                        APIDBG("Failed to fully write the preset symbol into the buffer."
+                               " Increase the buffer size.\n");
+                        return PAPI_EBUF;
+                }
 		papi_return( PAPI_OK );
 	}
 
@@ -1537,13 +1544,8 @@ PAPI_event_code_to_name( int EventCode, char *out )
 			return PAPI_ENOCMP;
 		}
 
-		int stringLength = PAPI_MAX_STR_LEN;
-		if (strcmp(_papi_hwd[compIdx]->cmp_info.name, "cuda") == 0) {
-			stringLength = PAPI_2MAX_STR_LEN;
-		}
-
 		return ( _papi_hwi_native_code_to_name
-				 ( ( unsigned int ) EventCode, out, stringLength ) );
+				 ( ( unsigned int ) EventCode, out, size ) );
 	}
 
 	if ( IS_USER_DEFINED(EventCode) ) {
@@ -1555,8 +1557,12 @@ PAPI_event_code_to_name( int EventCode, char *out )
 		if (user_defined_events[EventCode].symbol == NULL )
 			papi_return( PAPI_ENOEVNT );
 
-		strncpy( out, user_defined_events[EventCode].symbol, PAPI_MAX_STR_LEN-1);
-		out[PAPI_MAX_STR_LEN-1] = '\0';
+		str_len = snprintf(out, size, "%s", user_defined_events[EventCode].symbol);
+		if (str_len < 0 || (size_t) str_len >= size) {
+			APIDBG("Failed to fully write the user defined event into the buffer."
+			       " Increase the buffer size.\n");
+			return PAPI_EBUF;
+		}
 		papi_return( PAPI_OK );
 	}
 

@@ -78,7 +78,7 @@ int main ( int argc, char **argv )
     long long values[1];
     long long originalValues[1];
     int code;
-    char event_names[1][PAPI_MAX_STR_LEN];
+    char event_names[1][PAPI_2MAX_STR_LEN];
     char event_descrs[1][PAPI_HUGE_STR_LEN];
     char units[1][PAPI_MIN_STR_LEN];
     int r;
@@ -136,7 +136,7 @@ int main ( int argc, char **argv )
     code = PAPI_NATIVE_MASK;
     r = PAPI_enum_cmp_event( &code, PAPI_ENUM_FIRST, powercap_cid );
     while ( r == PAPI_OK ) {
-        retval = PAPI_event_code_to_name( code, event_names[0] );
+        retval = PAPI_event_code_to_name( code, event_names[0], sizeof(event_names[0]) );
         if ( retval != PAPI_OK )
             test_fail( __FILE__, __LINE__,"Error from PAPI_event_code_to_name", retval );
 

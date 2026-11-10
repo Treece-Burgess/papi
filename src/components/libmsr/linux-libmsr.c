@@ -841,7 +841,7 @@ int _libmsr_ntv_enum_events( unsigned int *EventCode, int modifier )
 /*
  *
  */
-int _libmsr_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+int _libmsr_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
     SUBDBG( "Enter: EventCode: %d\n", EventCode );
     int index = EventCode & PAPI_NATIVE_AND_MASK;

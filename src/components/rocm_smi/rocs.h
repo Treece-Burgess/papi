@@ -14,7 +14,7 @@ int rocs_shutdown(void);
 int rocs_evt_enum(unsigned int *event_code, int modifier);
 int rocs_evt_code_to_descr(unsigned int event_code, char *descr, int len);
 int rocs_evt_name_to_code(const char *name, unsigned int *event_code);
-int rocs_evt_code_to_name(unsigned int event_code, char *name, int len);
+int rocs_evt_code_to_name(unsigned int event_code, char *name, size_t len);
 
 /* error handling interfaces */
 int rocs_err_get_last(const char **err_string);

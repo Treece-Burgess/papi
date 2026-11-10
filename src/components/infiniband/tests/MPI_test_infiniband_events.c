@@ -92,7 +92,7 @@ int main (int argc, char **argv) {
     int failedEventIndex = 0;
 
     /* Note: these are fixed length arrays */ 
-    char eventNames[MAX_IB_EVENTS][PAPI_MAX_STR_LEN];
+    char eventNames[MAX_IB_EVENTS][PAPI_2MAX_STR_LEN];
     char description[MAX_IB_EVENTS][PAPI_MAX_STR_LEN];
     long long values[NSTEPS][MAX_IB_EVENTS];
 
@@ -319,7 +319,7 @@ int main (int argc, char **argv) {
         }  // end -- handle error cases for PAPI_add_event()
 
         /* get event name of added event */
-        retVal = PAPI_event_code_to_name (code, eventNames[eventNum]);
+        retVal = PAPI_event_code_to_name (code, eventNames[eventNum], sizeof(eventNames[eventNum]));
         if (retVal != PAPI_OK ) {
             // handle error cases for PAPI_event_code_to_name().
             codeConvertFailCount++; // error reporting
@@ -640,9 +640,9 @@ int main (int argc, char **argv) {
 
         if (failedEventIndex > 0) {
             printf("\tNames of Events NOT tested: ");
-            char failedEventName[PAPI_MAX_STR_LEN];
+            char failedEventName[PAPI_2MAX_STR_LEN];
             for (i = 0; i < failedEventIndex; i++) {
-                retVal = PAPI_event_code_to_name (failedEventCodes[i], failedEventName);
+                retVal = PAPI_event_code_to_name (failedEventCodes[i], failedEventName, sizeof(failedEventName));
                 if (retVal != PAPI_OK) {
                     strncpy(failedEventName, "ERROR:NOT_AVAILABLE", sizeof(failedEventName)-1);
                     failedEventName[sizeof(failedEventName)-1] = '\0';

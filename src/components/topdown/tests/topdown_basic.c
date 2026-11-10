@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 	const PAPI_component_info_t *cmpinfo = NULL;
 	int numcmp, cid, topdown_cid = -1;
 	int code, maximum_code = 0;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	PAPI_event_info_t event_info;
 	int num_events = 0;
 	long long *values;
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
 	while (retval == PAPI_OK)
 	{
-		if (PAPI_event_code_to_name(code, event_name) != PAPI_OK)
+		if (PAPI_event_code_to_name(code, event_name, sizeof(event_name)) != PAPI_OK)
 		{
 			printf("Error translating %#x\n", code);
 			test_fail(__FILE__, __LINE__,

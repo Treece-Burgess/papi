@@ -629,12 +629,12 @@ intel_gpu_ntv_enum_events(uint32_t *EventCode, int modifier )
 }
 
 static int 
-intel_gpu_ntv_code_to_name( uint32_t EventCode, char *name, int len )
+intel_gpu_ntv_code_to_name( uint32_t EventCode, char *name, size_t len )
 {
 	GPUDEBUG("Entering intel_gpu_ntv_code_to_name\n");
 	int  index = GetIdx(EventCode);
 
-	if( ( index < 0 ) || ( index >= total_metrics ) || !name || !len ) {
+	if( ( index < 0 ) || ( index >= total_metrics ) || !name ) {
 		return PAPI_EINVAL;
 	}
 

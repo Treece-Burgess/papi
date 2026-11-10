@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     int retval, i, event_cnt = 0, cidx;
     int EventCode, EventSet = PAPI_NULL;
     long long values[NUM_EVENTS];
-    char EventName[PAPI_MAX_STR_LEN], lm_events[NUM_EVENTS][PAPI_MAX_STR_LEN];
+    char EventName[PAPI_2MAX_STR_LEN], lm_events[NUM_EVENTS][PAPI_MAX_STR_LEN];
 
     /* determine if we quiet output */
     tests_quiet(argc, argv);
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     /* enumerate through the available lmsensors events and add a maximum of three */
     modifier = PAPI_ENUM_EVENTS;
     do {
-        retval = PAPI_event_code_to_name(EventCode, EventName);
+        retval = PAPI_event_code_to_name(EventCode, EventName, sizeof(EventName));
         if (retval != PAPI_OK) {
             test_fail(__FILE__, __LINE__, "PAPI_event_code_to_name", retval);
         }

@@ -35,7 +35,7 @@ static _Atomic bool t1_started = false;
 /* Selected event (global so both threads see the same string). */
 static const char* g_event = NULL;
 /* Storage for auto-selected event name when argv[1] is not provided. */
-static char g_event_auto[PAPI_MAX_STR_LEN] = {0};
+static char g_event_auto[PAPI_2MAX_STR_LEN] = {0};
 
 /**
  * Thread 1:
@@ -157,15 +157,15 @@ int main(int argc, char** argv) {
         if (PAPI_enum_cmp_event(&code, PAPI_ENUM_FIRST, cid) != PAPI_OK)
             SKIP("No native events found for AMD-SMI component");
 
-        char base_name[PAPI_MAX_STR_LEN] = {0};
-        if (PAPI_event_code_to_name(code, base_name) != PAPI_OK || base_name[0] == '\0')
+        char base_name[PAPI_2MAX_STR_LEN] = {0};
+        if (PAPI_event_code_to_name(code, base_name, sizeof(base_name)) != PAPI_OK || base_name[0] == '\0')
             SKIP("Could not resolve AMD-SMI event name");
 
         int qualified = 0;
         if (PAPI_event_name_to_code(base_name, &qualified) != PAPI_OK)
             SKIP("Could not canonicalize AMD-SMI event name");
 
-        if (PAPI_event_code_to_name(qualified, g_event_auto) != PAPI_OK || g_event_auto[0] == '\0')
+        if (PAPI_event_code_to_name(qualified, g_event_auto, sizeof(base_name)) != PAPI_OK || g_event_auto[0] == '\0')
             SKIP("Could not resolve canonical AMD-SMI event name");
 
         g_event = g_event_auto;

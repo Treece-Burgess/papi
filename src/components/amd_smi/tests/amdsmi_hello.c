@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     HarnessOpts opts = parse_harness_cli(argc, argv);
 
     // Selected event: argv[1] if provided, else we'll enumerate and pick the first AMD-SMI native event.
-    char ev_buf[PAPI_MAX_STR_LEN] = {0};
+    char ev_buf[PAPI_2MAX_STR_LEN] = {0};
     const char* ev = NULL;
     if (argc > 1 && strncmp(argv[1], "--", 2) != 0) {
         if (harness_canonicalize_event_name(argv[1], ev_buf, sizeof(ev_buf)) == PAPI_OK) {
@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
             SKIP("No native events found for AMD-SMI component");
         }
 
-        char base_name[PAPI_MAX_STR_LEN] = {0};
-        if (PAPI_event_code_to_name(base_code, base_name) != PAPI_OK || base_name[0] == '\0') {
+        char base_name[PAPI_2MAX_STR_LEN] = {0};
+        if (PAPI_event_code_to_name(base_code, base_name, sizeof(base_name)) != PAPI_OK || base_name[0] == '\0') {
             SKIP("Could not resolve AMD-SMI event name");
         }
 
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
             SKIP("Could not canonicalize AMD-SMI event name");
         }
 
-        if (PAPI_event_code_to_name(qualified_code, ev_buf) != PAPI_OK || ev_buf[0] == '\0') {
+        if (PAPI_event_code_to_name(qualified_code, ev_buf, sizeof(base_name)) != PAPI_OK || ev_buf[0] == '\0') {
             SKIP("Could not resolve canonical AMD-SMI event name");
         }
 

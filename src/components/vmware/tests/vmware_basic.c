@@ -24,7 +24,7 @@ int main (int argc, char **argv)
 	int EventSet = PAPI_NULL;
 	long long values[NUM_EVENTS];
 	int code;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	int total_events=0;
 	int r;
 	const PAPI_component_info_t *cmpinfo = NULL;
@@ -76,7 +76,7 @@ int main (int argc, char **argv)
                             "PAPI_get_event_info", retval );
 	      }
 
-	      retval = PAPI_event_code_to_name( code, event_name );
+	      retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
 	      if ( retval != PAPI_OK ) {
 		 printf("Error translating %#x\n",code);
 	         test_fail( __FILE__, __LINE__,

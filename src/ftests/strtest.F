@@ -30,7 +30,7 @@ C Set MSGLEN to the number of characters in the named event in MSGCODE
       CHARACTER*(PAPI_MAX_STR_LEN) papistr
       CHARACTER*(PAPI_MAX_STR_LEN*2) papidblstr
 
-      CHARACTER*(PAPI_MAX_STR_LEN) ckstr
+      CHARACTER*(PAPI_2MAX_STR_LEN) ckstr
       CHARACTER*(MSGLEN) invstr1
       CHARACTER*(MSGLEN+1) invstr2
       CHARACTER*(MSGLEN+2) invstr3
@@ -203,7 +203,7 @@ C Set MSGLEN to the number of characters in the named event in MSGCODE
       end if
 
       code=incode
-      call PAPIF_event_code_to_name(code,string,check)
+      call PAPIF_event_code_to_name(code,string, len(string), check)
       if(check.ne.PAPI_OK)then
         if (len(string).ge.lastchar)then
           call ftest_fail(__FILE__, __LINE__,

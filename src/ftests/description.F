@@ -72,7 +72,7 @@
          print *, "Event Name       Code"
       end if
       do i = 1, eventtotal
-         call PAPIf_event_code_to_name (eventlist(i), name, retval)
+         call PAPIf_event_code_to_name (eventlist(i), name, len(name), retval)
          if ( retval.NE.PAPI_OK) then
             call ftest_fail(__FILE__, __LINE__, 
      *'PAPIf_event_code_to_name', retval)
@@ -157,7 +157,7 @@
       end if
 
       if (tests_quiet .EQ. 0) then
-        call PAPIf_event_code_to_name (eventlist(1), name, retval)
+        call PAPIf_event_code_to_name (eventlist(1), name, len(name), retval)
         if ( retval.NE.PAPI_OK) then
           call ftest_fail(__FILE__, __LINE__, 
      *      'PAPIf_event_code_to_name', retval)

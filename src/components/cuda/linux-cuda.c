@@ -59,7 +59,7 @@ static int cuda_get_evt_count(int *count);
 
 /* cuda native event conversion utility functions */
 static int cuda_ntv_enum_events(unsigned int *event_code, int modifier);
-static int cuda_ntv_code_to_name(unsigned int event_code, char *name, int len);
+static int cuda_ntv_code_to_name(unsigned int event_code, char *name, size_t len);
 static int cuda_ntv_name_to_code(const char *name, unsigned int *event_code);
 static int cuda_ntv_code_to_descr(unsigned int event_code, char *descr, int len);
 static int cuda_ntv_code_to_info(unsigned int event_code, PAPI_event_info_t *info);
@@ -295,7 +295,7 @@ static int cuda_ntv_name_to_code(const char *name, unsigned int *event_code)
         goto fn_exit;
 }
 
-static int cuda_ntv_code_to_name(unsigned int event_code, char *name, int len)
+static int cuda_ntv_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     int papi_errno = check_n_initialize();
     if (papi_errno != PAPI_OK) {

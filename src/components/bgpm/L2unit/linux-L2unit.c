@@ -606,7 +606,7 @@ L2UNIT_ntv_name_to_code( const char *name, unsigned int *event_code )
  *
  */
 int
-L2UNIT_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+L2UNIT_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 #ifdef DEBUG_BGQ
 	//printf( "L2UNIT_ntv_code_to_name\n" );

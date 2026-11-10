@@ -561,7 +561,7 @@ IOUNIT_ntv_name_to_code( const char *name, unsigned int *event_code )
  *
  */
 int
-IOUNIT_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+IOUNIT_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 #ifdef DEBUG_BGQ
 	//printf( "IOUNIT_ntv_code_to_name\n" );

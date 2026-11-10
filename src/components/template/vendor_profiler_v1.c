@@ -291,7 +291,7 @@ vendorp1_evt_enum(unsigned int *event_code, int modifier)
 }
 
 int
-vendorp1_evt_code_to_name(unsigned int event_code, char *name, int len)
+vendorp1_evt_code_to_name(unsigned int event_code, char *name, size_t len)
 {
     int papi_errno;
 

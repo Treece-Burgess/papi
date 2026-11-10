@@ -995,7 +995,7 @@ _vmware_ntv_code_to_info(unsigned int EventCode, PAPI_event_info_t *info)
  @param len is the size of the string
  */
 int
-_vmware_ntv_code_to_name( unsigned int EventCode, char *name, int len )
+_vmware_ntv_code_to_name( unsigned int EventCode, char *name, size_t len )
 {
 	int index = EventCode;
 

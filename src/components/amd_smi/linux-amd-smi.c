@@ -304,7 +304,7 @@ static int _amd_smi_ntv_enum_events(unsigned int *EventCode, int modifier) {
     return amds_evt_enum(EventCode, modifier);
 }
 
-static int _amd_smi_ntv_code_to_name(unsigned int EventCode, char *name, int len) {
+static int _amd_smi_ntv_code_to_name(unsigned int EventCode, char *name, size_t len) {
     int papi_errno = _amd_smi_check_n_initialize();
     if (papi_errno != PAPI_OK) {
         return papi_errno;

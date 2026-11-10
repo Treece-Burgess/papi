@@ -210,7 +210,7 @@ static int get_ntv_events(cuptiu_event_table_t *evt_table, const char *evt_name,
 static int verify_user_added_events(uint32_t *events_id, int num_events, cuptip_control_t state);
 static int evt_id_to_info(uint32_t event_id, event_info_t *info);
 static int evt_id_create(event_info_t *info, uint32_t *event_id);
-static int evt_code_to_name(uint32_t event_code, char *name, int len);
+static int evt_code_to_name(uint32_t event_code, char *name, size_t len);
 static int evt_name_to_basename(const char *name, char *base, int len);
 static int evt_name_to_device(const char *name, int *device, const char *base);
 static int evt_name_to_stat(const char *name, int *stat, const char *base);
@@ -1797,7 +1797,7 @@ int cuptip_evt_name_to_code(const char *name, uint32_t *event_code)
   * @param len
   *   Maximum alloted characters for base Cuda native event name. 
 */
-int cuptip_evt_code_to_name(uint32_t event_code, char *name, int len)
+int cuptip_evt_code_to_name(uint32_t event_code, char *name, size_t len)
 {
     return evt_code_to_name(event_code, name, len);
 }
@@ -1812,7 +1812,7 @@ int cuptip_evt_code_to_name(uint32_t event_code, char *name, int len)
   * @param len
   *   Maximum alloted characters for base Cuda native event name. 
 */
-static int evt_code_to_name(uint32_t event_code, char *name, int len)
+static int evt_code_to_name(uint32_t event_code, char *name, size_t len)
 {
     event_info_t info;
     int papi_errno = evt_id_to_info(event_code, &info);

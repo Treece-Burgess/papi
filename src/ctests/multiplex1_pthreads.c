@@ -82,16 +82,16 @@ init_papi_pthreads( int *out_events, int *len )
 	}
 
 	for ( i = 0; in_events[i] != 0; i++ ) {
-		char out[PAPI_MAX_STR_LEN];
+		char out[PAPI_2MAX_STR_LEN];
 		/* query and set up the right instruction to monitor */
 		retval = PAPI_query_event( in_events[i] );
 		if ( retval == PAPI_OK ) {
 			out_events[real_len++] = in_events[i];
-			PAPI_event_code_to_name( in_events[i], out );
+			PAPI_event_code_to_name( in_events[i], out, sizeof(out) );
 			if ( real_len == *len )
 				break;
 		} else {
-			PAPI_event_code_to_name( in_events[i], out );
+			PAPI_event_code_to_name( in_events[i], out, sizeof(out) );
 			if ( !TESTS_QUIET )
 				printf( "%s does not exist\n", out );
 		}
@@ -151,12 +151,12 @@ case1_pthreads( void *arg )
 	}
 
 	for ( i = 0; i < PAPI_events_len; i++ ) {
-		char out[PAPI_MAX_STR_LEN];
+		char out[PAPI_2MAX_STR_LEN];
 
 		retval = PAPI_add_event( EventSet, PAPI_events[i] );
 		if ( retval != PAPI_OK )
 			test_fail(__FILE__, __LINE__, "PAPI_add_event", retval );
-		PAPI_event_code_to_name( PAPI_events[i], out );
+		PAPI_event_code_to_name( PAPI_events[i], out, sizeof(out) );
 		if ( !TESTS_QUIET )
 			printf( "Added %s\n", out );
 	}
@@ -227,12 +227,12 @@ case2_pthreads( void *arg )
 	}
 
 	for ( i = 0; i < PAPI_events_len; i++ ) {
-		char out[PAPI_MAX_STR_LEN];
+		char out[PAPI_2MAX_STR_LEN];
 
 		retval = PAPI_add_event( EventSet, PAPI_events[i] );
 		if ( retval != PAPI_OK )
 			test_fail(__FILE__, __LINE__, "PAPI_add_event", retval );
-		PAPI_event_code_to_name( PAPI_events[i], out );
+		PAPI_event_code_to_name( PAPI_events[i], out, sizeof(out) );
 		if ( !TESTS_QUIET )
 			printf( "Added %s\n", out );
 	}
@@ -288,12 +288,12 @@ case3_pthreads( void *arg )
 	}
 
 	for ( i = 0; i < PAPI_events_len; i++ ) {
-		char out[PAPI_MAX_STR_LEN];
+		char out[PAPI_2MAX_STR_LEN];
 
 		retval = PAPI_add_event( EventSet, PAPI_events[i] );
 		if ( retval != PAPI_OK )
 			test_fail(__FILE__, __LINE__, "PAPI_add_event", retval );
-		PAPI_event_code_to_name( PAPI_events[i], out );
+		PAPI_event_code_to_name( PAPI_events[i], out, sizeof(out) );
 		if ( !TESTS_QUIET )
 			printf( "Added %s\n", out );
 	}
@@ -343,7 +343,7 @@ case4_pthreads( void *arg )
 	( void ) arg;			 /*unused */
 	int retval, i, EventSet = PAPI_NULL;
 	long long values[4];
-	char out[PAPI_MAX_STR_LEN];
+	char out[PAPI_2MAX_STR_LEN];
 
 	if ( ( retval = PAPI_register_thread(  ) ) != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_register_thread", retval );
@@ -357,7 +357,7 @@ case4_pthreads( void *arg )
 	retval = PAPI_add_event( EventSet, PAPI_events[i] );
 	if ( retval != PAPI_OK )
 		test_fail(__FILE__, __LINE__, "PAPI_add_event", retval );
-	PAPI_event_code_to_name( PAPI_events[i], out );
+	PAPI_event_code_to_name( PAPI_events[i], out, sizeof(out) );
 	if (!TESTS_QUIET) printf( "Added %s\n", out );
 
 	if ( ( retval = PAPI_set_multiplex( EventSet ) ) != PAPI_OK ) {
@@ -371,7 +371,7 @@ case4_pthreads( void *arg )
 	retval = PAPI_add_event( EventSet, PAPI_events[i] );
 	if ( retval != PAPI_OK )
 		test_fail(__FILE__, __LINE__, "PAPI_add_event", retval );
-	PAPI_event_code_to_name( PAPI_events[i], out );
+	PAPI_event_code_to_name( PAPI_events[i], out, sizeof(out) );
 	if (!TESTS_QUIET) printf( "Added %s\n", out );
 
 	do_stuff(  );

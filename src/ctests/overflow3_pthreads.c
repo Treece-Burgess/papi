@@ -51,7 +51,7 @@ mainloop( int arg )
 	int num_events1;
 	long long **values;
 	int PAPI_event;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 
 	( void ) arg;
 
@@ -94,7 +94,7 @@ mainloop( int arg )
 		test_fail( __FILE__, __LINE__, "PAPI_overflow", retval );
 
 	if ( ( retval =
-		   PAPI_event_code_to_name( PAPI_event, event_name ) ) != PAPI_OK )
+		   PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) ) ) != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 
 	if ( !TESTS_QUIET ) {

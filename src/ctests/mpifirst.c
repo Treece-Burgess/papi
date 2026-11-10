@@ -33,7 +33,7 @@ main( int argc, char **argv )
 	long long **values;
 	int EventSet = PAPI_NULL;
 	int PAPI_event, mask;
-	char event_name[PAPI_MAX_STR_LEN], add_event_str[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN], add_event_str[PAPI_2MAX_STR_LEN];
 	int quiet;
 
 	/* Set TESTS_QUIET variable */
@@ -55,7 +55,7 @@ main( int argc, char **argv )
 		mask = MASK_TOT_INS | MASK_TOT_CYC;
 	}
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) );
 	if ( retval != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	sprintf( add_event_str, "PAPI_add_event[%s]", event_name );

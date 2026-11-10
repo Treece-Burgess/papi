@@ -28,7 +28,7 @@ main( int argc, char **argv )
 	int EventSet = PAPI_NULL;
 	long long values[2];
 	const PAPI_hw_info_t *hwinfo = NULL;
-	char descr[PAPI_MAX_STR_LEN];
+	char descr[PAPI_2MAX_STR_LEN];
 	PAPI_event_info_t evinfo;
 	PAPI_mh_level_t *L;
 
@@ -178,7 +178,7 @@ main( int argc, char **argv )
 	}
 
 	for ( i = 0; eventlist[i] != 0; i++ ) {
-	        if (PAPI_event_code_to_name( eventlist[i], descr ) != PAPI_OK)
+	        if (PAPI_event_code_to_name( eventlist[i], descr, sizeof(descr) ) != PAPI_OK)
 	           continue;
 		if ( PAPI_add_event( EventSet, eventlist[i] ) != PAPI_OK )
 		   continue;

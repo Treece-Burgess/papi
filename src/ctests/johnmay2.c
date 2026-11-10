@@ -12,7 +12,7 @@ main( int argc, char **argv )
 	int FPEventSet = PAPI_NULL;
 	long long values;
 	int PAPI_event, retval;
-	char event_name[PAPI_MAX_STR_LEN];
+	char event_name[PAPI_2MAX_STR_LEN];
 	int quiet;
 
 	/* Set TESTS_QUIET variable */
@@ -86,7 +86,7 @@ main( int argc, char **argv )
 
 	if ( !quiet ) {
 		if ( ( retval =
-			   PAPI_event_code_to_name( PAPI_event, event_name ) ) != PAPI_OK )
+			   PAPI_event_code_to_name( PAPI_event, event_name, sizeof(event_name) ) ) != PAPI_OK )
 			test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 
 		printf( "Test case John May 2: cleanup / destroy eventset.\n" );

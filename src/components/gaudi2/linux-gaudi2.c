@@ -1254,7 +1254,7 @@ static int gaudi2_ntv_enum_events(unsigned int *EventCode, int modifier)
     }
 }
 
-static int gaudi2_ntv_code_to_name(unsigned int EventCode, char *name, int len)
+static int gaudi2_ntv_code_to_name(unsigned int EventCode, char *name, size_t len)
 {
     gaudi2_event_info_t info;
     int papi_errno;

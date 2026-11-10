@@ -159,8 +159,8 @@ int main(int argc, char *argv[]) {
     }
 
     while (1) {
-      char ev_name[PAPI_MAX_STR_LEN] = {0};
-      if (PAPI_event_code_to_name(qualified_code, ev_name) != PAPI_OK) {
+      char ev_name[PAPI_2MAX_STR_LEN] = {0};
+      if (PAPI_event_code_to_name(qualified_code, ev_name, sizeof(ev_name)) != PAPI_OK) {
         NOTE("[%4d] Skipping 0x%x (unable to resolve name)", stats.index,
              qualified_code);
         ++stats.skipped;

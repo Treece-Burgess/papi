@@ -242,7 +242,7 @@ int coretemp_ntv_enum_events (unsigned int *EventCode, int modifier)
  @param name is a pointer for the name to be copied to
  @param len is the size of the string
  */
-int coretemp_ntv_code_to_name (unsigned int EventCode, char *name, int len)
+int coretemp_ntv_code_to_name (unsigned int EventCode, char *name, size_t len)
 {
 	int index = EventCode;
 

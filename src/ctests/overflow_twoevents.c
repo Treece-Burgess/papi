@@ -92,7 +92,7 @@ main( int argc, char **argv )
 	long long ( values[3] )[2];
 	int retval;
 	int PAPI_event, k, idx[4];
-	char event_name[3][PAPI_MAX_STR_LEN];
+	char event_name[3][PAPI_2MAX_STR_LEN];
 	int num_events1;
 	int threshold = THRESHOLD;
 	int quiet;
@@ -214,12 +214,12 @@ main( int argc, char **argv )
 	if ( ( retval = PAPI_cleanup_eventset( EventSet ) ) != PAPI_OK )
 		test_fail( __FILE__, __LINE__, "PAPI_cleanup_eventset", retval );
 
-	retval = PAPI_event_code_to_name( PAPI_event, event_name[0] );
+	retval = PAPI_event_code_to_name( PAPI_event, event_name[0], sizeof(event_name[0]) );
 	if (retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}
 
-	retval = PAPI_event_code_to_name( PAPI_TOT_CYC, event_name[1] );
+	retval = PAPI_event_code_to_name( PAPI_TOT_CYC, event_name[1], sizeof(event_name[1]) );
 	if (retval != PAPI_OK ) {
 		test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
 	}

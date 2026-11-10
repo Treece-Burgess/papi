@@ -184,8 +184,8 @@ add_test_events( int *number, int *mask, int allow_derived )
 			}
 			else {
 				if ( !TESTS_QUIET ) {
-				PAPI_event_code_to_name(test_events[i].event,
-							name_string);
+				PAPI_event_code_to_name(test_events[i].event, name_string,
+							sizeof(name_string));
 				fprintf( stdout, "%#x %s is not available.\n",
 					test_events[i].event,name_string);
 				}
@@ -607,7 +607,7 @@ test_print_event_header( const char *call, int evset )
         int *ev_ids;
 	int i, nev;
 	int retval;
-	char evname[PAPI_MAX_STR_LEN];
+	char evname[PAPI_2MAX_STR_LEN];
 
 	if ( *call )
 		fprintf( stdout, "%s", call );
@@ -626,7 +626,7 @@ test_print_event_header( const char *call, int evset )
 
 	if ( retval == PAPI_OK ) {
 		for ( i = 0; i < nev; i++ ) {
-			PAPI_event_code_to_name( ev_ids[i], evname );
+			PAPI_event_code_to_name( ev_ids[i], evname, sizeof(evname) );
 			printf( ONEHDR, evname );
 		}
 	} else {

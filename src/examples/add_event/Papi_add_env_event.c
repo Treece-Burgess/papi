@@ -43,7 +43,7 @@ int main(){
   int EventSet=PAPI_NULL;
   int event_code=PAPI_TOT_INS; /* By default monitor total instructions */
   char errstring[PAPI_MAX_STR_LEN];
-  char event_name[PAPI_MAX_STR_LEN];
+  char event_name[PAPI_2MAX_STR_LEN];
   float a[1000],b[1000],c[1000];
   long long values;
 
@@ -92,7 +92,7 @@ int main(){
         exit(-1);
   }
 
-  if ( (retval=PAPI_event_code_to_name( event_code, event_name))!=PAPI_OK){
+  if ( (retval=PAPI_event_code_to_name( event_code, event_name, sizeof(event_name) ))!=PAPI_OK){
         PAPI_perror("PAPI_event_code_to_name");   
         exit(-1);
   }

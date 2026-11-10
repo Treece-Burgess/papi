@@ -193,11 +193,11 @@ int main(int argc, char **argv) {                                       // args 
          }
 
          // Test getting name from code, consistency with info.
-         char testName[PAPI_MAX_STR_LEN] = "";                       // needed for test.
-         ret=PAPI_event_code_to_name(code, testName);                // turn code back into a name.
-         if (ret != PAPI_OK) {                                       // If that failed, report it.
-            retlen = snprintf(errMsg, availBytes, "PAPI_event_code_to_name(('0x%08X') failed.\n", code);
-            if (retlen < 0 || (size_t)retlen >= availBytes)
+         char testName[PAPI_2MAX_STR_LEN] = "";                         // needed for test.
+         ret=PAPI_event_code_to_name(code, testName, sizeof(testName)); // turn code back into a name.
+         if (ret != PAPI_OK) {                                          // If that failed, report it.
+            retlen = snprintf(errMsg, PAPI_MAX_STR_LEN, "PAPI_event_code_to_name(('0x%08X') failed.\n", code);
+            if (retlen <= 0 || PAPI_MAX_STR_LEN <= retlen)
               continue;
             test_fail( __FILE__, __LINE__, errMsg, ret);
          }

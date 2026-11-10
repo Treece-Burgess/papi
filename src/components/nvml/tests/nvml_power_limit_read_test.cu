@@ -41,7 +41,7 @@ int main( int argc, char** argv )
     int events[NUM_EVENTS];
     int eventCount = 0;
     const PAPI_component_info_t *cmpinfo;
-    char event_name[PAPI_MAX_STR_LEN];
+    char event_name[PAPI_2MAX_STR_LEN];
 
     /* PAPI Initialization */
     retval = PAPI_library_init( PAPI_VER_CURRENT );
@@ -91,7 +91,7 @@ int main( int argc, char** argv )
         retval = PAPI_enum_cmp_event( &code, event_modifier, cid );
         event_modifier = PAPI_ENUM_EVENTS;
         if ( retval != PAPI_OK ) test_fail( __FILE__, __LINE__, "PAPI_event_code_to_name", retval );
-        retval = PAPI_event_code_to_name( code, event_name );
+        retval = PAPI_event_code_to_name( code, event_name, sizeof(event_name) );
         char *ss; 
         // We need events that END in power_management_limit; and must 
         // exclude those that end in power_management_limit_min or _max, 

@@ -11,7 +11,7 @@ int _pe_libpfm4_ntv_name_to_code( const char *ntv_name,
 				    unsigned int *EventCode, int cidx,
 		       struct native_event_table_t *event_table);
 int _pe_libpfm4_ntv_code_to_name( unsigned int EventCode, char *name,
-				    int len,
+				    size_t len,
 		       struct native_event_table_t *event_table);
 int _pe_libpfm4_ntv_code_to_descr( unsigned int EventCode, char *name,
 				     int len,

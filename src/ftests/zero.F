@@ -98,7 +98,7 @@
 
       call stringify_granularity(granularity, grnstr)
       if (tests_quiet .EQ. 0) then
-        call PAPIf_event_code_to_name (event, name, retval)
+        call PAPIf_event_code_to_name (event, name, len(name), retval)
         if ( retval.NE.PAPI_OK) then
           call ftest_fail(__FILE__, __LINE__, 
      *         'PAPIf_event_code_to_name', retval)

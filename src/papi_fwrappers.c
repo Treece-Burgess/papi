@@ -41,13 +41,19 @@
 #if defined(_AIX) || defined(sun) || defined(linux)
 #define _FORTRAN_STRLEN_AT_END
 #endif
+
+#if __GNUC__ > 7
+typedef size_t fortran_charlen_t;
+#else
+typedef int fortran_charlen_t;
+#endif
 /* The Low Level Wrappers */
 
 /** \internal @defgroup PAPIF PAPI Fortran Low Level API */
 
 /* helper routine to convert Fortran strings to C strings */
 #if defined(_FORTRAN_STRLEN_AT_END)
-static void Fortran2cstring( char *cstring, char *Fstring, int clen , int Flen )
+static void Fortran2cstring( char *cstring, char *Fstring, int clen , fortran_charlen_t Flen )
 {
 	int slen, i;
 
@@ -109,7 +115,7 @@ PAPI_FCALL( papif_add_event, PAPIF_ADD_EVENT,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_add_named_event, PAPIF_ADD_NAMED_EVENT,
-			( int *EventSet, char *EventName, int *check, int Event_len ) )
+			( int *EventSet, char *EventName, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, EventName, PAPI_MAX_STR_LEN, Event_len );
@@ -238,7 +244,7 @@ PAPI_FCALL( papif_get_exe_info, PAPIF_GET_EXE_INFO,
 			( char *fullname, char *name, long long *text_start,
 			  long long *text_end, long long *data_start, long long *data_end,
 			  long long *bss_start, long long *bss_end,
-			  int *check, int fullname_len, int name_len ) )
+			  int *check, fortran_charlen_t fullname_len, fortran_charlen_t name_len ) )
 #else
 PAPI_FCALL( papif_get_exe_info, PAPIF_GET_EXE_INFO,
 			( char *fullname, char *name, long long *text_start,
@@ -297,8 +303,8 @@ PAPI_FCALL( papif_get_hardware_info, PAPIF_GET_HARDWARE_INFO, ( int *ncpu,
 																char *model_str,
 																float *revision,
 																float *mhz,
-																int vendor_len,
-																int
+																fortran_charlen_t vendor_len,
+																fortran_charlen_t
 																model_len ) )
 #else
 PAPI_FCALL( papif_get_hardware_info, PAPIF_GET_HARDWARE_INFO, ( int *ncpu,
@@ -470,7 +476,7 @@ PAPI_FCALL( papif_get_virt_usec, PAPIF_GET_VIRT_USEC, ( long long *time ) )
  * @see PAPI_get_component_index
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
-PAPI_FCALL( papif_get_component_index, PAPIF_GET_COMPONENT_INDEX, ( char *component_name, int *component_index, int name_len) )
+PAPI_FCALL( papif_get_component_index, PAPIF_GET_COMPONENT_INDEX, ( char *component_name, int *component_index, fortran_charlen_t name_len) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, component_name, PAPI_MAX_STR_LEN, name_len );
@@ -659,7 +665,7 @@ PAPI_FCALL( papif_set_multiplex, PAPIF_SET_MULTIPLEX,
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_perror, PAPIF_PERROR,
 			( char *message,
-			  int message_len ) )
+			  fortran_charlen_t message_len ) )
 #else
 PAPI_FCALL( papif_perror, PAPIF_PERROR,
 			( char *message ) )
@@ -711,7 +717,7 @@ PAPI_FCALL( papif_query_event, PAPIF_QUERY_EVENT,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_query_named_event, PAPIF_QUERY_NAMED_EVENT,
-			( char *EventName, int *check, int Event_len ) )
+			( char *EventName, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, EventName, PAPI_MAX_STR_LEN, Event_len );
@@ -741,8 +747,9 @@ PAPI_FCALL( papif_query_named_event, PAPIF_QUERY_NAMED_EVENT,
 PAPI_FCALL( papif_get_event_info, PAPIF_GET_EVENT_INFO,
 			( int *EventCode, char *symbol, char *long_descr, char *short_descr,
 			  int *count, char *event_note, int *flags, int *check,
-			  int symbol_len, int long_descr_len, int short_descr_len,
-			  int event_note_len ) )
+			  fortran_charlen_t symbol_len, fortran_charlen_t long_descr_len,
+			  fortran_charlen_t short_descr_len,
+			  fortran_charlen_t event_note_len ) )
 #else
 PAPI_FCALL( papif_get_event_info, PAPIF_GET_EVENT_INFO,
 			( int *EventCode, char *symbol, char *long_descr, char *short_descr,
@@ -801,7 +808,7 @@ PAPI_FCALL( papif_get_event_info, PAPIF_GET_EVENT_INFO,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_event_code_to_name, PAPIF_EVENT_CODE_TO_NAME,
-			( int *EventCode, char *out_str, int *check, int out_len ) )
+			( int *EventCode, char *out_str, int *check, fortran_charlen_t out_len ) )
 #else
 PAPI_FCALL( papif_event_code_to_name, PAPIF_EVENT_CODE_TO_NAME,
 			( int *EventCode, char *out, int *check ) )
@@ -833,7 +840,7 @@ PAPI_FCALL( papif_event_code_to_name, PAPIF_EVENT_CODE_TO_NAME,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_event_name_to_code, PAPIF_EVENT_NAME_TO_CODE,
-			( char *in_str, int *out, int *check, int in_len ) )
+			( char *in_str, int *out, int *check, fortran_charlen_t in_len ) )
 #else
 PAPI_FCALL( papif_event_name_to_code, PAPIF_EVENT_NAME_TO_CODE,
 			( char *in, int *out, int *check ) )
@@ -953,7 +960,7 @@ PAPI_FCALL( papif_remove_event, PAPIF_REMOVE_EVENT,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_remove_named_event, PAPIF_REMOVE_NAMED_EVENT,
-			( int *EventSet, char *EventName, int *check, int Event_len ) )
+			( int *EventSet, char *EventName, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, EventName, PAPI_MAX_STR_LEN, Event_len );
@@ -1220,7 +1227,7 @@ PAPI_FCALL( papif_get_clockrate, PAPIF_GET_CLOCKRATE, ( int *cr ) )
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_get_preload, PAPIF_GET_PRELOAD,
-			( char *lib_preload_env, int *check, int lib_preload_env_len ) )
+			( char *lib_preload_env, int *check, fortran_charlen_t lib_preload_env_len ) )
 #else
 PAPI_FCALL( papif_get_preload, PAPIF_GET_PRELOAD,
 			( char *lib_preload_env, int *check ) )
@@ -1469,7 +1476,7 @@ PAPI_FCALL( papif_get_dev_type_attr, PAPIF_GET_DEV_TYPE_ATTR, (int *handle_index
                                                                int *value,
                                                                char *string,
                                                                int *check,
-                                                               int string_len) )
+                                                               fortran_charlen_t string_len) )
 #else
 PAPI_FCALL( papif_get_dev_type_attr, PAPIF_GET_DEV_TYPE_ATTR, (int *handle_index,
                                                                int *attribute,
@@ -1534,7 +1541,7 @@ PAPI_FCALL( papif_get_dev_attr, PAPIF_GET_DEV_ATTR, (int *handle_index,
                                                      int *value,
                                                      char *string,
                                                      int *check,
-                                                     int string_len) )
+                                                     fortran_charlen_t string_len) )
 #else
 PAPI_FCALL( papif_get_dev_attr, PAPIF_GET_DEV_ATTR, (int *handle_index,
                                                      int *id,
@@ -1694,7 +1701,7 @@ PAPI_FCALL( papif_get_dev_attr, PAPIF_GET_DEV_ATTR, (int *handle_index,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_hl_region_begin, PAPIF_HL_REGION_BEGIN,
-			( char* name, int *check, int Event_len ) )
+			( char* name, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, name, PAPI_MAX_STR_LEN, Event_len );
@@ -1763,7 +1770,7 @@ PAPI_FCALL( papif_hl_region_begin, PAPIF_HL_REGION_BEGIN,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_hl_read, PAPIF_HL_READ,
-			( char* name, int *check, int Event_len ) )
+			( char* name, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, name, PAPI_MAX_STR_LEN, Event_len );
@@ -1826,7 +1833,7 @@ PAPI_FCALL( papif_hl_read, PAPIF_HL_READ,
  */
 #if defined(_FORTRAN_STRLEN_AT_END)
 PAPI_FCALL( papif_hl_region_end, PAPIF_HL_REGION_END,
-			( char* name, int *check, int Event_len ) )
+			( char* name, int *check, fortran_charlen_t Event_len ) )
 {
 	char tmp[PAPI_MAX_STR_LEN];
 	Fortran2cstring( tmp, name, PAPI_MAX_STR_LEN, Event_len );
